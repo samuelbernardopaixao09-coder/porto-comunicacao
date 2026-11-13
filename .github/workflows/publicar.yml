@@ -45,6 +45,11 @@ jobs:
           fi
           mkdir site
           cp index.html sw.js manifest.json icon-192.png icon-512.png site/
+          if [ -f logo.svg ]; then
+            sudo apt-get install -y -qq librsvg2-bin >/dev/null
+            rsvg-convert -w 512 -h 512 logo.svg -o site/icon-512.png
+            rsvg-convert -w 192 -h 192 logo.svg -o site/icon-192.png
+          fi
           ls -la site
       - uses: actions/upload-pages-artifact@v3
         with:

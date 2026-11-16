@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Custos de Material Porto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: uma coluna estreita, grupos por categoria, cada material numa linha com custo e preço mínimo à direita */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#17202e; --muted:#667085; --line:#e4e7ec;
+  --accent:#1f3a5f; --accent-soft:#e8eef6; --good:#137a4b; --good-soft:#e7f5ee; --warn:#9a6700; --warn-soft:#fff6db;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141b; --surface:#161d27; --fg:#e7ebf1; --muted:#98a2b3; --line:#263040;
+  --accent:#8fb3e0; --accent-soft:#1c2a3c; --good:#5fd39a; --good-soft:#13261e; --warn:#f0c35a; --warn-soft:#2a2414; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --surface:#161d27; --fg:#e7ebf1; --muted:#98a2b3; --line:#263040;
+  --accent:#8fb3e0; --accent-soft:#1c2a3c; --good:#5fd39a; --good-soft:#13261e; --warn:#f0c35a; --warn-soft:#2a2414; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header h1{font-family:var(--f-display);font-weight:600;font-size:30px;letter-spacing:-.01em;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted)}
+.ctrl{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.busca{flex:1 1 240px;min-width:0;position:relative}
+.busca input{width:100%;font:inherit;padding:10px 12px 10px 36px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
+.busca svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted)}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.margem{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:13px;border:0;background:none;color:var(--fg);padding:8px 11px;cursor:pointer;font-variant-numeric:tabular-nums}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.grupo{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.grupo h2{font-family:var(--f-display);font-weight:600;font-size:17px;margin:0;padding:14px 18px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.grupo h2 small{font-family:var(--f-body);font-weight:400;font-size:13px;color:var(--muted)}
+.cab,.item{display:grid;grid-template-columns:minmax(0,1fr) 108px 120px;gap:12px;align-items:center;padding:10px 18px}
+.cab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-block:6px;border-bottom:1px solid var(--line)}
+.cab span:not(:first-child),.num{text-align:right}
+.item+.item{border-top:1px solid var(--line)}
+.nome{font-weight:500}
+.meta{font-size:13px;color:var(--muted);margin-top:2px}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.num small{color:var(--muted);font-size:12px;margin-left:2px}
+.min{color:var(--good);font-weight:600}
+.min .tag{display:inline-block;background:var(--good-soft);border-radius:6px;padding:2px 7px}
+.vazio{padding:28px 18px;color:var(--muted);text-align:center}
+.falta{background:var(--warn-soft);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.falta h2{font-family:var(--f-display);font-size:16px;margin:0 0 6px;color:var(--warn)}
+.falta p{margin:0 0 10px;color:var(--fg)}
+.falta ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.falta li{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px}
+.nota{font-size:13px;color:var(--muted)}
+.custo-m{display:none;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+@media (max-width:560px){
+  .cab,.item{grid-template-columns:minmax(0,1fr) 92px;padding-inline:14px}
+  .cab span:nth-child(2),.item .custo{display:none}
+  .item .min .custo-m{display:block}
+  header h1{font-size:25px}
+}
+@media (prefers-reduced-motion:no-preference){.chip,.seg button{transition:background .15s,color .15s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Custos de material</h1>
+    <p>26 materiais tirados das notas fiscais de 02/10 a 12/11/2026, com IPI. O preço mínimo já inclui a perda de cada material.</p>
+  </header>
+
+  <div class="ctrl">
+    <label class="busca" for="q">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscar material ou fornecedor" autocomplete="off">
+    </label>
+    <div class="margem"><span>Material no máximo</span>
+      <div class="seg" id="seg" role="group" aria-label="Material no máximo do preço"></div>
+    </div>
+  </div>
+
+  <div class="chips" id="chips" role="group" aria-label="Filtrar por categoria"></div>
+
+  <div id="lista" style="display:flex;flex-direction:column;gap:16px"></div>
+
+  <section class="falta">
+    <h2>Ainda sem nota fiscal</h2>
+    <p>Esses entram nos orçamentos e na OS sem custo calculado. Mande as notas para incluir.</p>
+    <ul><li>Acrílico</li><li>LED + fonte</li><li>PVC expandido</li><li>PS</li><li>Vinil perfurado</li><li>MDF</li><li>Bastão + cordão</li><li>Tinta / pintura</li></ul>
+  </section>
+
+  <p class="nota">Preço mínimo = custo × (1 + perda) ÷ margem. Com 30%, o material fica com no máximo 30% do preço de venda; o resto cobre mão de obra, impostos e lucro.</p>
+</div>
+
+<script>
+const D=[
+ ["Chapa","ACM 3 mm","m²",389,6.1,.15,"Chapa 1,22 × 5,00 m","Geoplas, 08/10"],
+ ["Lona","Lona front brilho","m²",683.99,90,.10,"Rolo 1,80 × 50 m","Print Nordeste, 15/10"],
+ ["Adesivo","Adesivo branco p/ impressão","m²",6.59,1,.15,"Rolo 1,06 m (OneSign)","Sid Sign, 08/10"],
+ ["Adesivo","Adesivo transparente","m²",9.89,1,.15,"Rolo 1,06 m (OneSign Clear)","Sid Sign, 08/10"],
+ ["Adesivo","Adesivo transparente","m²",11.70,1.27,.15,"Metro linear, rolo 1,27 m","Poti, 06/11"],
+ ["Adesivo","Adesivo blackout 120 g","m²",438,63.5,.15,"Rolo 1,27 × 50 m","Print Nordeste, 29/10 e 20/10"],
+ ["Adesivo","Adesivo blackout 120 g","m²",369,53.5,.15,"Rolo 1,07 × 50 m","Print Nordeste, 06/11"],
+ ["Adesivo","Adesivo jateado","m²",451.01,63.5,.15,"Rolo 1,27 × 50 m","Print Nordeste, 20/10"],
+ ["Adesivo","Jateado Ice Blue (premium)","m²",39.14,1.38,.15,"Metro linear, rolo 1,38 m","Poti, 04/11"],
+ ["Vinil de recorte","Vinil Premium verde abacate","m²",23.06,1.22,.25,"Metro linear, rolo 1,22 m","Poti, 05/11 e 06/10"],
+ ["Vinil de recorte","Vinil Premium preto","m²",22.22,1.22,.25,"Metro linear, rolo 1,22 m","Poti, 05/11"],
+ ["Vinil de recorte","Vinil Silver Max black piano","m²",27.30,1.22,.25,"Metro linear, rolo 1,22 m","Poti, 06/10"],
+ ["Vinil de recorte","Vinil ND1060G cinza brilho","m²",23.07,1.22,.25,"Metro linear, rolo 1,22 m","Poti, 04/11"],
+ ["Vinil de recorte","Vinil Ultra Apple Green","m²",53.03,1.38,.25,"Metro linear, rolo 1,38 m","Poti, 15/10"],
+ ["Laminação","Pisomax (laminação de piso)","m²",29.87,1.22,.15,"Metro linear, rolo 1,22 m","Poti, 02/10 e 04/11"],
+ ["Estrutura","Metalon 20×20 #18","m",41.03,6,.10,"Barra 6 m, R$ 9,77/kg","Novo Nordeste, 09/10"],
+ ["Estrutura","Metalon 50×30 #18","m",83.13,6,.10,"Barra 6 m, R$ 9,78/kg","Novo Nordeste, 09/10"],
+ ["Estrutura","Metalon 70×30 #18","m",109.45,6,.10,"Barra 6 m, R$ 9,72/kg","Novo Nordeste, 09/10"],
+ ["Estrutura","Tubo galvanizado 1.1/2\" #16","m",110.89,6,.10,"Barra 6 m, R$ 9,99/kg","Novo Nordeste, 02/10"],
+ ["Fixação e aplicação","Máscara de transferência","m²",198.19,30.5,.10,"Rolo 0,61 × 50 m","Poti, 05/11 e 06/10"],
+ ["Fixação e aplicação","Fita dupla face B160","m",76,20,.05,"Rolo 19 mm × 20 m","Geoplas, 08/10 e 27/10"],
+ ["Fixação e aplicação","Fita dupla face T100","m",30,20,.05,"Rolo 19 mm × 20 m","Geoplas, 27/10"],
+ ["Consumíveis","Cola instantânea 20 g","un",12.70,1,0,"Unidade","Esperança Nordeste, 12/11"],
+ ["Consumíveis","Fita crepe 18 mm","un",5.32,1,0,"Rolo 50 m","Esperança Nordeste, 12/11"],
+ ["Consumíveis","Álcool isopropílico 900 ml","un",33.66,1,0,"Frasco","Poti, 05/11"],
+ ["Consumíveis","Ponteira 7/8","un",21.63,100,0,"Pacote com 100","Poti, 04/11"]
+];
+const CATS=[...new Set(D.map(r=>r[0]))];
+const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const st={q:"",cat:"Todos",m:.30};
+try{const s=JSON.parse(localStorage.getItem("cm")||"{}");if(s.m)st.m=s.m;if(s.cat)st.cat=s.cat}catch(e){}
+const save=()=>{try{localStorage.setItem("cm",JSON.stringify({m:st.m,cat:st.cat}))}catch(e){}};
+
+const seg=document.getElementById("seg");
+[.25,.30,.35,.40].forEach(m=>{const b=document.createElement("button");b.type="button";b.textContent=Math.round(m*100)+"%";b.onclick=()=>{st.m=m;save();draw()};b.dataset.m=m;seg.appendChild(b)});
+const chips=document.getElementById("chips");
+["Todos",...CATS].forEach(c=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=c;b.onclick=()=>{st.cat=c;save();draw()};chips.appendChild(b)});
+document.getElementById("q").addEventListener("input",e=>{st.q=e.target.value;draw()});
+
+function draw(){
+  seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(Number(b.dataset.m)===st.m)));
+  chips.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.textContent===st.cat)));
+  const q=st.q.trim().toLowerCase();
+  const html=CATS.filter(c=>st.cat==="Todos"||st.cat===c).map(c=>{
+    const rows=D.filter(r=>r[0]===c&&(!q||(r[1]+" "+r[6]+" "+r[7]).toLowerCase().includes(q)));
+    if(!rows.length)return "";
+    const un=rows[0][2];
+    return `<section class="grupo"><h2>${esc(c)}<small>${rows.length} ${rows.length>1?"materiais":"material"}</small></h2>
+      <div class="cab"><span>Material</span><span>Custo</span><span>Preço mínimo</span></div>
+      ${rows.map(r=>{const custo=r[3]/r[4],min=custo*(1+r[5])/st.m;const u=`<small>/${r[2]}</small>`;
+        return `<div class="item"><div><div class="nome">${esc(r[1])}</div><div class="meta">${esc(r[6])} · ${brl(r[3])} · ${esc(r[7])}${r[5]?` · perda ${Math.round(r[5]*100)}%`:""}</div></div>
+        <div class="num custo">${brl(custo)}${u}</div>
+        <div class="num min"><span class="tag">${brl(min)}${u}</span><span class="custo-m">custo ${brl(custo)}</span></div></div>`}).join("")}
+    </section>`}).join("");
+  document.getElementById("lista").innerHTML=html||`<div class="grupo vazio">Nenhum material encontrado para “${esc(st.q)}”.</div>`;
+}
+draw();
+</script>
+</body>
+</html>

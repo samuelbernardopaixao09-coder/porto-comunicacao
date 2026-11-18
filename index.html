@@ -69,7 +69,7 @@ function iaRetoma(f){if(confirm('A IA vai reassumir '+(EM()?'o atendimento por e
 function orc(f){if(confirm('Montar agora a proposta de '+tel(f)+' com o que já foi conversado?'))acao(EM()?{a:'eorc',mail:f}:{a:'orc',fone:f},'📄 Montando a proposta… ela aparece em "Aprovar"')}
 function pago(pk){if(confirm('Marcar a proposta Nº '+pk+' como PAGA?'))acao({a:EM()?'epago':'pago',pk},'💰 Proposta '+pk+' marcada como paga')}
 function os(pk){window.open('https://portocomunicacao.app.n8n.cloud/webhook/os?k='+encodeURIComponent(K)+'&n='+encodeURIComponent(pk),'_blank')}
-function novoOrc(e){e.preventDefault();const t=document.getElementById('no-texto').value.trim();if(t.length<5){toast('Descreva o pedido');return}const n=document.getElementById('no-nome').value.trim(),f=document.getElementById('no-fone').value.trim(),em=document.getElementById('no-email').value.trim();if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Confira o e-mail do cliente');return}document.getElementById('no-btn').disabled=true;CH='wa';try{localStorage.setItem('pch','wa')}catch(x){}acao({a:'novo',texto:(t+TXTS.map(x=>'\n\n[ARQUIVO ANEXADO: '+x.nome+']\n'+x.texto).join('')).slice(0,30000),nome:n,fone:f,email:em,imgs:IMGS.slice(0,12),docs:DOCS.slice(0,3)},'📄 Gerando o orçamento… ele aparece em Aprovar em cerca de 1 minuto');IMGS=[];DOCS=[];TXTS=[];setTimeout(()=>setTab('aprovar'),800);setTimeout(carregar,45000);setTimeout(carregar,75000)}
+function novoOrc(e){e.preventDefault();const t=document.getElementById('no-texto').value.trim();if(t.length<5){toast('Descreva o pedido');return}const n=document.getElementById('no-nome').value.trim(),f=document.getElementById('no-fone').value.trim(),em=document.getElementById('no-email').value.trim();if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Confira o e-mail do cliente');return}document.getElementById('no-btn').disabled=true;CH='wa';try{localStorage.setItem('pch','wa')}catch(x){}acao({a:'novo',texto:(t+TXTS.map(x=>'\n\n[ARQUIVO ANEXADO: '+x.nome+']\n'+x.texto).join('')).slice(0,30000),nome:n,fone:f,email:em,imgs:IMGS.slice(0,12),imgLeg:IMGS.slice(0,12).map(u=>(window.__LEG||{})[u.length+':'+u.slice(-48)]||''),docs:DOCS.slice(0,3)},'📄 Gerando o orçamento… ele aparece em Aprovar em cerca de 1 minuto');IMGS=[];DOCS=[];TXTS=[];setTimeout(()=>setTab('aprovar'),800);setTimeout(carregar,45000);setTimeout(carregar,75000)}
 let PRE=null,NV={},NVi=0,IMGS=[],DOCS=[],TXTS=[],NOMODO='ia',PDFF='';
 function modoBar(){return '<div class="card" style="padding:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn '+(NOMODO=='ia'?'pri':'mid')+'" onclick="NOMODO=\'ia\';render()">🤖 Gerar com a IA</button><button class="btn '+(NOMODO=='fora'?'pri':'mid')+'" onclick="NOMODO=\'fora\';render()">📥 Registrar orçamento feito por fora</button><button class="btn '+(NOMODO=='busca'?'pri':'mid')+'" onclick="NOMODO=\'busca\';render()">🔎 Buscar orçamento</button></div>'}
 let BQ='';
@@ -118,7 +118,7 @@ A.innerHTML='<div class="kpis"><div class="kpi"><div class="l">Propostas no mês
 const dlg=document.getElementById('dlg');try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 carregar();setInterval(()=>{if(!document.hidden&&!dlg.open&&TAB!='novo')carregar()},60000);
 </script><script>
-/* ===== Anexos v2: aceita o máximo de formatos ===== */
+/* ===== Anexos v3: aceita o máximo de formatos + tira as imagens de PDF/PowerPoint ===== */
 (function(){
 const CDN='https://cdnjs.cloudflare.com/ajax/libs/';
 const MAXARQ=10, PDFDIRETO=2.5e6, MAXPAGS=6;
@@ -126,23 +126,38 @@ const ext=f=>((f.name||'').split('.').pop()||'').toLowerCase();
 const aviso=m=>{try{toast(m)}catch(e){alert(m)}};
 function lib(src,glob){return (typeof carregaLib==='function')?carregaLib(src,glob):new Promise((ok,er)=>{if(window[glob])return ok(window[glob]);const s=document.createElement('script');s.src=src;s.onload=()=>ok(window[glob]);s.onerror=er;document.head.appendChild(s)})}
 const ler=(f,m)=>new Promise((ok,er)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=er;m==='url'?r.readAsDataURL(f):m==='txt'?r.readAsText(f):r.readAsArrayBuffer(f)});
+window.__LEG=window.__LEG||{};
+const legKey=u=>u.length+':'+u.slice(-48);
+function pushImg(u,leg){if(!u||IMGS.length>=16)return false;if(IMGS.some(x=>x.length===u.length&&x.slice(-200)===u.slice(-200)))return false;IMGS.push(u);window.__LEG[legKey(u)]=String(leg||'').slice(0,120);return true}
 async function paraJpeg(blob){
   const u=URL.createObjectURL(blob);
   try{const im=new Image();await new Promise((ok,er)=>{im.onload=ok;im.onerror=er;im.src=u});
-    const w=im.naturalWidth||1200,h=im.naturalHeight||900,s=Math.min(1,1600/Math.max(w,h));
+    const w=im.naturalWidth||1200,h=im.naturalHeight||900,s=Math.min(1,1400/Math.max(w,h));
     const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);
     const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(im,0,0,cv.width,cv.height);
-    return cv.toDataURL('image/jpeg',0.82);}finally{URL.revokeObjectURL(u)}
+    return cv.toDataURL('image/jpeg',0.8);}finally{URL.revokeObjectURL(u)}
 }
 async function pdfjs(){const p=await lib(CDN+'pdf.js/3.11.174/pdf.min.js','pdfjsLib');p.GlobalWorkerOptions.workerSrc=CDN+'pdf.js/3.11.174/pdf.worker.min.js';return p}
-async function lerPdf(buf){
+async function abrirPdf(buf){
   const p=await pdfjs();const d=await p.getDocument({data:new Uint8Array(buf)}).promise;
   let tx='';for(let i=1;i<=Math.min(d.numPages,40);i++){const c=await(await d.getPage(i)).getTextContent();tx+=c.items.map(x=>x.str).join(' ')+'\n'}
-  const imgs=[];for(let i=1;i<=Math.min(d.numPages,MAXPAGS);i++){const pg=await d.getPage(i);const v=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2.5,1600/Math.max(v.width,v.height))});
-    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
-    await pg.render({canvasContext:g,viewport:vp}).promise;imgs.push(cv.toDataURL('image/jpeg',0.8))}
-  return {tx:tx.trim(),imgs,pags:d.numPages};
+  return {d,tx:tx.trim(),pags:d.numPages};
 }
+async function renderPags(d,n){const out=[];for(let i=1;i<=Math.min(d.numPages,n);i++){const pg=await d.getPage(i);const v=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2.5,1400/Math.max(v.width,v.height))});
+    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+    await pg.render({canvasContext:g,viewport:vp}).promise;out.push(cv.toDataURL('image/jpeg',0.78))}return out}
+function objParaJpeg(o){if(!o)return null;const w=o.width,h=o.height;if(!w||!h||w<250||h<180||w*h<120000)return null;const s=Math.min(1,1400/Math.max(w,h));const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+  if(o.bitmap){g.drawImage(o.bitmap,0,0,cv.width,cv.height)}else if(o.data){const t=document.createElement('canvas');t.width=w;t.height=h;const id=t.getContext('2d').createImageData(w,h);const D=id.data,S=o.data;
+    if(o.kind===3){for(let q=0;q<D.length;q++)D[q]=S[q]}else if(o.kind===2){for(let a=0,b=0;b<D.length;a+=3,b+=4){D[b]=S[a];D[b+1]=S[a+1];D[b+2]=S[a+2];D[b+3]=255}}else if(o.kind===1){const rb=(w+7)>>3;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const bit=(S[y*rb+(x>>3)]>>(7-(x&7)))&1;const b=(y*w+x)*4;const v=bit?255:0;D[b]=D[b+1]=D[b+2]=v;D[b+3]=255}}else return null;
+    t.getContext('2d').putImageData(id,0,0);g.drawImage(t,0,0,cv.width,cv.height)}else return null;
+  try{const px=g.getImageData(0,0,cv.width,cv.height).data;let mn=255,mx=0;for(let q=0;q<px.length;q+=4*97){const v=px[q]*.3+px[q+1]*.59+px[q+2]*.11;if(v<mn)mn=v;if(v>mx)mx=v}if(mx-mn<25)return null}catch(e){}
+  return cv.toDataURL('image/jpeg',0.8)}
+async function imgsEmbutidas(d,nome){const p=window.pdfjsLib;const out=[];const vistos=new Set();
+  for(let i=1;i<=Math.min(d.numPages,20)&&out.length<6;i++){let pg,ops;try{pg=await d.getPage(i);ops=await pg.getOperatorList()}catch(e){continue}
+    for(let k=0;k<ops.fnArray.length&&out.length<6;k++){const fn=ops.fnArray[k];if(fn!==p.OPS.paintImageXObject&&fn!==p.OPS.paintJpegXObject)continue;const id=ops.argsArray[k][0];if(typeof id!=='string'||vistos.has(id))continue;vistos.add(id);
+      const obj=await new Promise(ok=>{let done=false;const fim=v=>{if(!done){done=true;ok(v)}};try{const src=id.startsWith('g_')?pg.commonObjs:pg.objs;if(src.has&&src.has(id))fim(src.get(id));else src.get(id,fim)}catch(e){fim(null)}setTimeout(()=>fim(null),4000)});
+      let u=null;try{u=objParaJpeg(obj)}catch(e){}if(u)out.push({u,leg:'Imagem tirada do PDF "'+nome+'" (pág. '+i+')'})}}
+  return out}
 async function zipTexto(buf,filtro,ordem){
   const Z=await lib(CDN+'jszip/3.10.1/jszip.min.js','JSZip');const z=await Z.loadAsync(buf);
   let nomes=Object.keys(z.files).filter(n=>filtro.test(n));if(ordem)nomes.sort((a,b)=>(parseInt(a.replace(/\D+/g,''))||0)-(parseInt(b.replace(/\D+/g,''))||0));
@@ -166,17 +181,20 @@ window.addImgs=async function(inp){
   aviso('⏳ Lendo '+fs.length+' arquivo(s)...');
   const falhas=[];
   for(const f of fs){
-    if(tot()>=MAXARQ+6){aviso('Limite de anexos atingido.');break}
+    if(DOCS.length+TXTS.length>=14){aviso('Limite de anexos atingido.');break}
     const e=ext(f);
     try{
       if(f.size>60e6){falhas.push(f.name+' (maior que 60 MB)');continue}
       // PDF (e .ai/.eps salvos com PDF dentro)
       if(f.type.includes('pdf')||e==='pdf'||((e==='ai'||e==='eps'||!f.type)&&await pdfMagic(f))){
-        const buf=await ler(f,'buf');let info=null;
-        try{info=await lerPdf(buf.slice(0))}catch(x){}
+        const buf=await ler(f,'buf');let info=null,emb=[];
+        try{info=await abrirPdf(buf.slice(0))}catch(x){}
+        if(info){try{emb=await imgsEmbutidas(info.d,f.name)}catch(x){console.warn('imgs pdf',x)}emb.forEach(x=>pushImg(x.u,x.leg))}
         if(f.size<=PDFDIRETO){DOCS.push({nome:f.name.replace(/\.(ai|eps)$/i,'.pdf'),b64:await ler(new Blob([buf],{type:'application/pdf'}),'url')});
-          if(info&&info.tx)TXTS.push({nome:f.name,texto:info.tx.slice(0,15000)})}
-        else if(info){info.imgs.forEach((u,i)=>IMGS.push(u));TXTS.push({nome:f.name+' ('+info.pags+' pág.'+(info.pags>MAXPAGS?', primeiras '+MAXPAGS+' viraram imagem':'')+')',texto:info.tx.slice(0,20000)||'(PDF sem texto — só imagens)'})}
+          if(info&&info.tx)TXTS.push({nome:f.name,texto:info.tx.slice(0,15000)});
+          if(info&&!emb.length){try{(await renderPags(info.d,2)).forEach((u,i)=>pushImg(u,'Página '+(i+1)+' do PDF "'+f.name+'"'))}catch(x){}}}
+        else if(info){try{(await renderPags(info.d,MAXPAGS)).forEach((u,i)=>pushImg(u,'Página '+(i+1)+' do PDF "'+f.name+'" (página inteira do documento)'))}catch(x){}
+          TXTS.push({nome:f.name+' ('+info.pags+' pág.'+(info.pags>MAXPAGS?', primeiras '+MAXPAGS+' viraram imagem':'')+')',texto:info.tx.slice(0,20000)||'(PDF sem texto — só imagens)'})}
         else falhas.push(f.name+' (PDF protegido ou corrompido)');
         continue;
       }
@@ -184,7 +202,7 @@ window.addImgs=async function(inp){
         let blob=f;
         if(/^(heic|heif)$/.test(e)||/hei[cf]/.test(f.type)){const H=await lib('https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js','heic2any');blob=await H({blob:f,toType:'image/jpeg',quality:0.85});if(Array.isArray(blob))blob=blob[0]}
         if(/^tiff?$/.test(e)){const U=await lib('https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js','UTIF');const b=await ler(f,'buf');const ifd=U.decode(b);U.decodeImage(b,ifd[0]);const rgba=U.toRGBA8(ifd[0]);const cv=document.createElement('canvas');cv.width=ifd[0].width;cv.height=ifd[0].height;cv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba),cv.width,cv.height),0,0);blob=await new Promise(ok=>cv.toBlob(ok,'image/png'))}
-        IMGS.push(await paraJpeg(blob));continue;
+        pushImg(await paraJpeg(blob),'Imagem anexada "'+f.name+'"');continue;
       }
       if(/^(xlsx|xlsm|xlsb|xls|ods|numbers|csv|tsv|fods)$/.test(e)){
         const X=await lib(CDN+'xlsx/0.18.5/xlsx.full.min.js','XLSX');const wb=X.read(await ler(f,'buf'),{type:'array'});
@@ -192,8 +210,8 @@ window.addImgs=async function(inp){
       }
       if(e==='docx'||e==='docm'||e==='dotx'){const M=await lib(CDN+'mammoth/1.6.0/mammoth.browser.min.js','mammoth');const r=await M.extractRawText({arrayBuffer:await ler(f,'buf')});TXTS.push({nome:f.name,texto:r.value.slice(0,20000)});continue}
       if(/^(pptx|ppsx|pptm|potx)$/.test(e)){const buf=await ler(f,'buf');TXTS.push({nome:f.name,texto:(await zipTexto(buf,/^ppt\/slides\/slide\d+\.xml$/,true)).slice(0,20000)||'(apresentação sem texto)'});
-        try{const Z=await lib(CDN+'jszip/3.10.1/jszip.min.js','JSZip');const z=await Z.loadAsync(buf);const ms=Object.keys(z.files).filter(n=>/^ppt\/media\/.+\.(png|jpe?g|gif|bmp|webp)$/i.test(n)).map(n=>({n,sz:z.files[n]._data&&z.files[n]._data.uncompressedSize||0})).sort((a,b)=>b.sz-a.sz).slice(0,4);
-          for(const m of ms){const bl=await z.file(m.n).async('blob');IMGS.push(await paraJpeg(bl))}}catch(x){console.warn('pptx imgs',x)}
+        try{const Z=await lib(CDN+'jszip/3.10.1/jszip.min.js','JSZip');const z=await Z.loadAsync(buf);const ms=Object.keys(z.files).filter(n=>/^ppt\/media\/.+\.(png|jpe?g|gif|bmp|webp)$/i.test(n)).map(n=>({n,sz:z.files[n]._data&&z.files[n]._data.uncompressedSize||0})).sort((a,b)=>b.sz-a.sz).slice(0,6);
+          for(const m of ms){try{const bl=await z.file(m.n).async('blob');pushImg(await paraJpeg(bl),'Imagem do PowerPoint "'+f.name+'"')}catch(x){}}}catch(x){console.warn('pptx imgs',x)}
         continue}
       if(/^(odt|odp|ott)$/.test(e)){TXTS.push({nome:f.name,texto:(await zipTexto(await ler(f,'buf'),/^content\.xml$/)).slice(0,20000)});continue}
       if(e==='rtf'){TXTS.push({nome:f.name,texto:rtfTexto(await ler(f,'txt')).slice(0,20000)});continue}
@@ -213,7 +231,7 @@ let _lb=0;libera();new MutationObserver(()=>{if(_lb)return;_lb=1;requestAnimatio
 })();
 </script>
 <script>
-/* ===== Editor de orçamento (📝 Editar) ===== */
+/* ===== Editor de orçamento (📝 Editar) v2 ===== */
 let ED=null;
 const edN=v=>{const s=String(v==null?'':v).trim();if(!s)return 0;const x=Number(s.replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.'));return isFinite(x)?x:0};
 const edF=v=>(v===0||v)?String(v).replace('.',','):'';
@@ -224,15 +242,21 @@ const st=document.createElement('style');st.textContent='#dlgEd label{display:bl
 document.head.appendChild(st);document.body.appendChild(d);d.addEventListener('input',edCalc);d.addEventListener('change',edCalc);return d}
 async function edApi(body){const r=await fetch(API+'?k='+encodeURIComponent(K),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({a:'editar'},body))});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw new Error(j.erro||('falha '+r.status));return j}
 async function editar(pk){const d=edDlg();document.getElementById('edT').textContent='Editar orçamento Nº '+pk;document.getElementById('edB').innerHTML='<p class="mut">Carregando…</p>';document.getElementById('edTot').textContent='';d.showModal();
-try{const j=await edApi({pk,modo:'ler'});ED=j;edRender()}catch(e){document.getElementById('edB').innerHTML='<p style="color:#b00">'+esc(e.message)+'</p>'}}
+try{const j=await edApi({pk,modo:'ler'});ED=j;ED.anx={imgs:[],docs:[],txts:[],legs:{}};edRender()}catch(e){document.getElementById('edB').innerHTML='<p style="color:#b00">'+esc(e.message)+'</p>'}}
 function edItemHtml(it,i){return '<div class="edIt" data-i="'+i+'"><div style="display:flex;gap:8px;align-items:center"><b style="flex:1">Item '+(i+1)+'</b><button class="btn" title="Subir" onclick="edMover('+i+',-1)">↑</button><button class="btn" title="Descer" onclick="edMover('+i+',1)">↓</button><button class="btn bad" onclick="edTirar('+i+')">🗑 Remover</button></div><label>Descrição</label><textarea rows="3" data-f="descricao">'+esc(it.descricao||'')+'</textarea><div class="edN"><div><label>Cobrança</label><select data-f="unidade"><option value="m2"'+(it.unidade==='m2'?' selected':'')+'>por m²</option><option value="un"'+(it.unidade!=='m2'?' selected':'')+'>por unidade</option></select></div><div><label>Largura (m)</label><input inputmode="decimal" data-f="largura_m" value="'+edF(it.largura_m)+'"></div><div><label>Altura (m)</label><input inputmode="decimal" data-f="altura_m" value="'+edF(it.altura_m)+'"></div><div><label>Quantidade</label><input inputmode="numeric" data-f="quantidade" value="'+edF(it.quantidade||1)+'"></div><div><label class="edPL">Preço unitário (R$)</label><input inputmode="decimal" data-f="preco_unitario" value="'+edF(it.preco_unitario)+'"></div><div class="edSub edSubT" style="white-space:nowrap;padding-bottom:9px"></div></div></div>'}
 function edRender(){const o=ED.orc||{};const c=o.cliente||{};const B=document.getElementById('edB');
 B.innerHTML=(ED.enviado?'<div class="edSub" style="background:#fff7e0;border:1px solid #f0d990;border-radius:8px;padding:8px">Este orçamento já foi enviado. Ao salvar, a nova versão (mesmo Nº '+esc(ED.pk)+') vai para <b>Aprovar</b> para você conferir e reenviar.</div>':'')
 +'<h4>Cliente e contato</h4><div class="edG"><div><label>Nome do contato</label><input id="edNome" value="'+esc(ED.nome||c.nome||'')+'"></div><div><label>Nome no PDF</label><input id="edCNome" value="'+esc(c.nome||'')+'"></div><div><label>Empresa</label><input id="edEmp" value="'+esc(c.empresa||'')+'"></div><div><label>CNPJ / CPF</label><input id="edCnpj" value="'+esc(c.cnpj||'')+'"></div><div><label>Endereço</label><input id="edEnd" value="'+esc(c.endereco||'')+'"></div><div><label>WhatsApp</label><input id="edFone" inputmode="tel" placeholder="81 9...." value="'+esc(ED.fone||'')+'"></div><div><label>E-mail</label><input id="edMail" type="email" value="'+esc(ED.email||'')+'"></div></div>'
 +'<h4>Itens</h4><div id="edItens">'+(o.itens||[]).map(edItemHtml).join('')+'</div><button class="btn mid" onclick="edAdd()">＋ Adicionar item</button>'
 +'<h4>Condições</h4><div class="edG"><div><label>Condições de pagamento</label><textarea rows="2" id="edPag">'+esc(o.condicoes_pagamento||'')+'</textarea></div><div><label>Prazo de execução</label><textarea rows="2" id="edPrazo">'+esc(o.prazo_execucao||'')+'</textarea></div></div>'
++'<h4>📎 Anexos</h4><div class="edSub">Anexe fotos, PDF, PowerPoint, Word, Excel… As imagens entram como candidatas para a proposta e a IA escolhe as melhores. Para a IA usar o conteúdo dos arquivos nos itens/valores, escreva o pedido no campo da IA abaixo.</div><div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><label class="btn mid" style="display:inline-block;width:auto;margin:0;color:inherit;font-size:14px">📎 Anexar arquivo<input type="file" multiple style="display:none" onchange="edAnexar(this)"></label><span id="edAnx"></span></div>'
 +'<div class="edIA"><b>🤖 Pedir à IA</b><div class="edSub">Escreva o ajuste e a IA refaz o orçamento. Ex.: "baixa o total pra R$ 1.800", "tira a instalação", "troca lona por adesivo", "coloca 3 unidades".</div><textarea rows="2" id="edInstr" style="margin-top:6px" placeholder="O que mudar?"></textarea><div style="margin-top:6px;text-align:right"><button id="edIABtn" class="btn ok" onclick="edSalvar(true)">🤖 Aplicar com IA e gerar PDF</button></div></div>';
-edCalc()}
+edCalc();edAnxVer()}
+function edAnxVer(){const el=document.getElementById('edAnx');if(!el)return;const a=ED.anx||{imgs:[],docs:[],txts:[]};const ch=[];a.imgs.forEach((u,i)=>ch.push('<span style="display:inline-flex;align-items:center;gap:4px;border:1px solid #ddd;border-radius:8px;padding:2px 6px;background:#fff"><img src="'+u+'" style="width:38px;height:38px;object-fit:cover;border-radius:4px"><button class="btn" style="padding:0 6px" onclick="edAnxTirar(\'imgs\','+i+')">✕</button></span>'));a.docs.forEach((d,i)=>ch.push('<span style="border:1px solid #ddd;border-radius:8px;padding:4px 8px;background:#fff">📄 '+esc(d.nome)+' <button class="btn" style="padding:0 6px" onclick="edAnxTirar(\'docs\','+i+')">✕</button></span>'));a.txts.forEach((t,i)=>ch.push('<span style="border:1px solid #ddd;border-radius:8px;padding:4px 8px;background:#fff">📝 '+esc(t.nome)+' <button class="btn" style="padding:0 6px" onclick="edAnxTirar(\'txts\','+i+')">✕</button></span>'));el.innerHTML=ch.join(' ')||'<span class="mut">nenhum anexo novo</span>'}
+function edAnxTirar(t,i){ED.anx[t].splice(i,1);edAnxVer()}
+async function edAnexar(inp){ED.anx=ED.anx||{imgs:[],docs:[],txts:[],legs:{}};const bak=[IMGS.slice(),DOCS.slice(),TXTS.slice()];IMGS.length=0;DOCS.length=0;TXTS.length=0;
+try{await addImgs(inp);IMGS.forEach(u=>{ED.anx.imgs.push(u);ED.anx.legs[u.length+':'+u.slice(-48)]=(window.__LEG||{})[u.length+':'+u.slice(-48)]||''});DOCS.forEach(d=>ED.anx.docs.push(d));TXTS.forEach(t=>ED.anx.txts.push(t))}catch(e){toast('Erro ao anexar: '+e.message)}
+finally{IMGS.length=0;DOCS.length=0;TXTS.length=0;bak[0].forEach(x=>IMGS.push(x));bak[1].forEach(x=>DOCS.push(x));bak[2].forEach(x=>TXTS.push(x));try{verImgs()}catch(e){}edAnxVer()}}
 function edLer(){const its=[...document.querySelectorAll('#edItens .edIt')].map(el=>{const i=+el.dataset.i;const base=Object.assign({},(ED.orc.itens||[])[i]||{});el.querySelectorAll('[data-f]').forEach(f=>{base[f.dataset.f]=f.value});base.largura_m=edN(base.largura_m);base.altura_m=edN(base.altura_m);base.quantidade=Math.max(1,Math.round(edN(base.quantidade)||1));base.preco_unitario=edN(base.preco_unitario);return base});
 const v=id=>(document.getElementById(id)||{}).value||'';const o=Object.assign({},ED.orc);o.itens=its;o.cliente=Object.assign({},o.cliente||{},{nome:v('edCNome').trim(),empresa:v('edEmp').trim(),cnpj:v('edCnpj').trim(),endereco:v('edEnd').trim()});o.condicoes_pagamento=v('edPag').trim();o.prazo_execucao=v('edPrazo').trim();return o}
 function edCalc(){if(!ED||!document.getElementById('edItens'))return;let tot=0;document.querySelectorAll('#edItens .edIt').forEach(el=>{const g=f=>(el.querySelector('[data-f="'+f+'"]')||{}).value;const un=g('unidade'),L=edN(g('largura_m')),A=edN(g('altura_m')),q=Math.max(1,Math.round(edN(g('quantidade'))||1)),p=edN(g('preco_unitario'));let v,info;if(un==='m2'&&L>0&&A>0){const ar=Math.max(L*A,1);v=ar*p*q;info=(L*A).toFixed(2).replace('.',',')+' m²'+(L*A<1?' (mín. 1)':'')+' → '+edBrl(v)}else{v=p*q;info=(un==='m2'?'⚠️ sem medida · ':'')+edBrl(v)}tot+=v;el.querySelector('.edSubT').textContent=info;el.querySelector('.edPL').textContent=un==='m2'?'Preço por m² (R$)':'Preço unitário (R$)'});document.getElementById('edTot').textContent='Total: '+edBrl(tot)}
@@ -242,7 +266,7 @@ function edMover(i,d){ED.orc=edLer();const a=ED.orc.itens,j=i+d;if(j<0||j>=a.len
 async function edSalvar(ia){const instr=(document.getElementById('edInstr')||{}).value||'';if(ia&&!instr.trim()){toast('Escreva o que a IA deve mudar.');return}
 const orc=edLer();if(!ia){if(orc.itens.some(it=>!String(it.descricao||'').trim())){toast('Preencha a descrição de todos os itens (ou remova os vazios).');return}}
 const bS=document.getElementById('edSalvar'),bI=document.getElementById('edIABtn');[bS,bI].forEach(b=>b&&(b.disabled=true));const lb=ia?bI:bS;const old=lb.textContent;lb.textContent='⏳ Gerando PDF…';
-try{const v=id=>(document.getElementById(id)||{}).value||'';const j=await edApi({pk:ED.pk,orc,instrucao:ia?instr:'',nome:v('edNome').trim(),fone:v('edFone'),email:v('edMail').trim()});
+try{const v=id=>(document.getElementById(id)||{}).value||'';const ax=ED.anx||{imgs:[],docs:[],txts:[],legs:{}};const im12=ax.imgs.slice(0,12);const j=await edApi({pk:ED.pk,orc,instrucao:ia?instr:'',nome:v('edNome').trim(),fone:v('edFone'),email:v('edMail').trim(),imgs:im12,imgLeg:im12.map(u=>ax.legs[u.length+':'+u.slice(-48)]||''),docs:ax.docs.slice(0,3),textos:ax.txts.map(t=>'[ARQUIVO ANEXADO: '+t.nome+']\n'+t.texto).join('\n\n').slice(0,30000)});ED.anx={imgs:[],docs:[],txts:[],legs:{}};
 if(ia){ED.orc=j.orc;edRender();toast('🤖 Ajuste aplicado — novo total '+j.total+'. A nova versão está em Aprovar.')}else{document.getElementById('dlgEd').close();toast('✅ Orçamento Nº '+j.pk+' atualizado ('+j.total+'). Confira em Aprovar e envie.')}
 if(!ia){try{setTab('aprovar')}catch(e){}}setTimeout(carregar,800)}
 catch(e){toast('Erro: '+e.message)}finally{[bS,bI].forEach(b=>b&&(b.disabled=false));lb.textContent=old}}

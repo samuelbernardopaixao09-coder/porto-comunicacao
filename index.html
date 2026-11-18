@@ -69,7 +69,7 @@ function iaRetoma(f){if(confirm('A IA vai reassumir '+(EM()?'o atendimento por e
 function orc(f){if(confirm('Montar agora a proposta de '+tel(f)+' com o que já foi conversado?'))acao(EM()?{a:'eorc',mail:f}:{a:'orc',fone:f},'📄 Montando a proposta… ela aparece em "Aprovar"')}
 function pago(pk){if(confirm('Marcar a proposta Nº '+pk+' como PAGA?'))acao({a:EM()?'epago':'pago',pk},'💰 Proposta '+pk+' marcada como paga')}
 function os(pk){window.open('https://portocomunicacao.app.n8n.cloud/webhook/os?k='+encodeURIComponent(K)+'&n='+encodeURIComponent(pk),'_blank')}
-function novoOrc(e){e.preventDefault();const t=document.getElementById('no-texto').value.trim();if(t.length<5){toast('Descreva o pedido');return}const n=document.getElementById('no-nome').value.trim(),f=document.getElementById('no-fone').value.trim(),em=document.getElementById('no-email').value.trim();if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Confira o e-mail do cliente');return}document.getElementById('no-btn').disabled=true;CH='wa';try{localStorage.setItem('pch','wa')}catch(x){}acao({a:'novo',texto:(t+TXTS.map(x=>'\n\n[ARQUIVO ANEXADO: '+x.nome+']\n'+x.texto).join('')).slice(0,30000),nome:n,fone:f,email:em,imgs:IMGS.slice(0,3),docs:DOCS.slice(0,3)},'📄 Gerando o orçamento… ele aparece em Aprovar em cerca de 1 minuto');IMGS=[];DOCS=[];TXTS=[];setTimeout(()=>setTab('aprovar'),800);setTimeout(carregar,45000);setTimeout(carregar,75000)}
+function novoOrc(e){e.preventDefault();const t=document.getElementById('no-texto').value.trim();if(t.length<5){toast('Descreva o pedido');return}const n=document.getElementById('no-nome').value.trim(),f=document.getElementById('no-fone').value.trim(),em=document.getElementById('no-email').value.trim();if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){toast('Confira o e-mail do cliente');return}document.getElementById('no-btn').disabled=true;CH='wa';try{localStorage.setItem('pch','wa')}catch(x){}acao({a:'novo',texto:(t+TXTS.map(x=>'\n\n[ARQUIVO ANEXADO: '+x.nome+']\n'+x.texto).join('')).slice(0,30000),nome:n,fone:f,email:em,imgs:IMGS.slice(0,12),docs:DOCS.slice(0,3)},'📄 Gerando o orçamento… ele aparece em Aprovar em cerca de 1 minuto');IMGS=[];DOCS=[];TXTS=[];setTimeout(()=>setTab('aprovar'),800);setTimeout(carregar,45000);setTimeout(carregar,75000)}
 let PRE=null,NV={},NVi=0,IMGS=[],DOCS=[],TXTS=[],NOMODO='ia',PDFF='';
 function modoBar(){return '<div class="card" style="padding:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn '+(NOMODO=='ia'?'pri':'mid')+'" onclick="NOMODO=\'ia\';render()">🤖 Gerar com a IA</button><button class="btn '+(NOMODO=='fora'?'pri':'mid')+'" onclick="NOMODO=\'fora\';render()">📥 Registrar orçamento feito por fora</button><button class="btn '+(NOMODO=='busca'?'pri':'mid')+'" onclick="NOMODO=\'busca\';render()">🔎 Buscar orçamento</button></div>'}
 let BQ='';
@@ -106,7 +106,7 @@ if(TAB=='usuarios'&&!ADM())TAB='aprovar';
 if(TAB=='usuarios'){A.innerHTML='<div class="card"><h3>👥 Usuários do app</h3><p class="mut">Cada setor entra com o próprio usuário e senha. Todos veem as mesmas telas. Ao trocar a senha de um setor, quem estava logado com a senha antiga sai na hora.</p><div id="us-list" class="mut" style="margin-top:10px">Carregando…</div></div>';carregarUsuarios();return}
 if(TAB=='novo'&&NOMODO=='busca'){A.innerHTML=modoBar()+'<div class="card" style="padding:10px"><input id="bq" placeholder="Nº do orçamento (ex.: 671), cliente, empresa ou código do pedido" value="'+esc(BQ)+'" oninput="BQ=this.value;document.getElementById(\'bq-r\').innerHTML=buscaOrc()"></div><div id="bq-r">'+buscaOrc()+'</div>'+listaOrc();const i=document.getElementById('bq');i.focus();i.setSelectionRange(i.value.length,i.value.length);return}
 if(TAB=='novo'&&NOMODO=='fora'){A.innerHTML=modoBar()+'<form class="card" onsubmit="registrarFora(event)"><h3>Registrar orçamento feito por fora</h3><p class="mut">Para um orçamento que você já fez e mandou fora do sistema. Ele entra em Pedidos e o cliente vai direto para Atendimentos, com a equipe. Nada é enviado ao cliente.</p><div class="row" style="margin-top:8px"><input id="rf-nome" placeholder="Nome do cliente" style="flex:1;min-width:160px"><input id="rf-empresa" placeholder="Empresa (opcional)" style="flex:1;min-width:160px"></div><div class="row" style="margin-top:8px"><input id="rf-fone" placeholder="WhatsApp do cliente" inputmode="tel" style="flex:1;min-width:160px"><input id="rf-email" type="email" placeholder="E-mail do cliente" style="flex:1;min-width:160px"></div><div class="row" style="margin-top:8px"><input id="rf-total" placeholder="Valor total (ex.: 3.485,00)" inputmode="decimal" style="flex:1;min-width:160px"><input id="rf-num" placeholder="Nº do orçamento original (opcional)" style="flex:1;min-width:160px"></div><textarea id="rf-desc" rows="5" required style="margin-top:8px" placeholder="O que foi orçado. Ex.: Fachada em ACM 4 x 1 m com estrutura, instalada em Boa Viagem. 50% na aprovação e 50% na entrega."></textarea><div style="margin-top:10px"><label class="btn mid" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">📎 Anexar PDF do orçamento<input type="file" accept="application/pdf" style="display:none" onchange="pdfFora(this)"></label> <span class="mut" id="rf-pdf">opcional, até 2 MB</span></div><p class="mut" style="margin-top:6px">Preencha o WhatsApp ou o e-mail: o cliente aparece em Atendimentos no canal correspondente.</p><div class="acts" style="justify-content:flex-end"><button class="btn pri" id="rf-btn">📥 Registrar e ir para Atendimentos</button></div></form>';return}
-if(TAB=='novo'){A.innerHTML=modoBar()+'<form class="card" onsubmit="novoOrc(event)"><h3>Novo orçamento</h3><p class="mut">Descreva o pedido: cliente, produtos, medidas, quantidade, local, forma de pagamento e prazo. A IA monta a proposta em PDF e ela aparece em Aprovar.</p><div class="row" style="margin-top:8px"><input id="no-nome" placeholder="Nome do cliente (opcional)" style="flex:1;min-width:160px"><input id="no-fone" placeholder="WhatsApp do cliente (opcional)" inputmode="tel" style="flex:1;min-width:160px"><input id="no-email" type="email" placeholder="E-mail do cliente (opcional)" style="flex:1;min-width:160px"></div><textarea id="no-texto" rows="8" required style="margin-top:8px" placeholder="Ex.: Padaria Pão Quente, A/C Marcos, Boa Viagem. Fachada em ACM 4 x 1 m instalada, 2 adesivos de vitrine 1 x 0,5 m e 1.000 panfletos A5 frente e verso. 50% na aprovação e 50% na entrega."></textarea><div style="margin-top:10px"><label class="btn mid" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">📎 Anexar arquivo<input type="file" accept="image/*,.pdf,.docx,.xlsx,.xls,.csv,.txt" multiple style="display:none" onchange="addImgs(this)"></label> <span class="mut">Imagem, PDF, Word (.docx), Excel (.xlsx/.csv) ou texto — até 5 arquivos. A IA lê tudo para montar o orçamento; as imagens também vão no PDF e na Ordem de Serviço.</span><div id="no-imgs" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"></div></div><p class="mut" style="margin-top:6px">Com o WhatsApp preenchido, ao aprovar a proposta ela vai para o cliente pelo WhatsApp. Com o e-mail preenchido, aparece o botão para enviar por e-mail. Sem nenhum dos dois, você baixa o PDF e envia como quiser.</p><div class="acts" style="justify-content:flex-end"><button class="btn pri" id="no-btn">📄 Gerar orçamento</button></div></form>';verImgs();if(PRE){document.getElementById('no-nome').value=PRE.n;document.getElementById('no-fone').value=PRE.f;const ta=document.getElementById('no-texto');ta.value=PRE.t;PRE=null;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}return}
+if(TAB=='novo'){A.innerHTML=modoBar()+'<form class="card" onsubmit="novoOrc(event)"><h3>Novo orçamento</h3><p class="mut">Descreva o pedido: cliente, produtos, medidas, quantidade, local, forma de pagamento e prazo. A IA monta a proposta em PDF e ela aparece em Aprovar.</p><div class="row" style="margin-top:8px"><input id="no-nome" placeholder="Nome do cliente (opcional)" style="flex:1;min-width:160px"><input id="no-fone" placeholder="WhatsApp do cliente (opcional)" inputmode="tel" style="flex:1;min-width:160px"><input id="no-email" type="email" placeholder="E-mail do cliente (opcional)" style="flex:1;min-width:160px"></div><textarea id="no-texto" rows="8" required style="margin-top:8px" placeholder="Ex.: Padaria Pão Quente, A/C Marcos, Boa Viagem. Fachada em ACM 4 x 1 m instalada, 2 adesivos de vitrine 1 x 0,5 m e 1.000 panfletos A5 frente e verso. 50% na aprovação e 50% na entrega."></textarea><div style="margin-top:10px"><label class="btn mid" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">📎 Anexar arquivo<input type="file" multiple multiple style="display:none" onchange="addImgs(this)"></label> <span class="mut">Imagem, PDF, Word (.docx), Excel (.xlsx/.csv) ou texto — vários arquivos de quase qualquer formato (PDF, PowerPoint, Word, Excel, fotos...). A IA lê tudo para montar o orçamento; as imagens também vão no PDF e na Ordem de Serviço.</span><div id="no-imgs" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"></div></div><p class="mut" style="margin-top:6px">Com o WhatsApp preenchido, ao aprovar a proposta ela vai para o cliente pelo WhatsApp. Com o e-mail preenchido, aparece o botão para enviar por e-mail. Sem nenhum dos dois, você baixa o PDF e envia como quiser.</p><div class="acts" style="justify-content:flex-end"><button class="btn pri" id="no-btn">📄 Gerar orçamento</button></div></form>';verImgs();if(PRE){document.getElementById('no-nome').value=PRE.n;document.getElementById('no-fone').value=PRE.f;const ta=document.getElementById('no-texto');ta.value=PRE.t;PRE=null;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}return}
 if(TAB=='aprovar'){A.innerHTML=pend.length?pend.map(p=>'<div class="card"><div class="row"><h3>Proposta Nº '+esc(p.pk)+'</h3>'+(p.estimativa?'<span class="tag t-est">ESTIMATIVA</span>':'')+'<span class="sp"></span><span class="big">'+esc(p.total)+'</span></div><div class="mut">'+(p.nome?esc(p.nome)+' · ':'')+(/^manual/.test(String(p.cli))?'Orçamento avulso':esc(tel(p.cli)))+' · '+dt(p.t)+(p.assunto?' · '+esc(p.assunto):'')+'</div><div style="margin-top:8px">'+(p.itens||[]).map(i=>'<div class="it">'+esc(i.q)+'× '+esc(i.d)+(i.m?' <span class="mut">('+esc(i.m)+')</span>':'')+'</div>').join('')+'</div>'+(p.texto?'<details><summary>Mensagem que vai junto</summary><div class="msg a">'+esc(p.texto)+'</div></details>':'')+'<div class="acts">'+(/^manual/.test(String(p.cli))?'':'<button class="btn ok" onclick="aprovar(\''+p.pk+'\')">✓ Enviar ao cliente</button>')+'<button class="btn mid" onclick="alterar(\''+p.pk+'\')">✏️ Alterar</button><button class="btn mid" onclick="pdf(\''+p.pk+'\')">📄 Ver PDF</button>'+convBtn(p.cli,p.nome)+nvBtn(p.nome,p.cli,'Baseado na proposta Nº '+p.pk+': '+(p.itens||[]).map(i=>i.q+'× '+i.d+(i.m?' ('+i.m+')':'')).join('; ')+'\n\nNovo pedido / o que muda: ')+''+(p.email&&!EM()?'<button class="btn ok" onclick="mailEnviar(\''+p.pk+'\',\''+esc(p.email)+'\')">✉️ Enviar por e-mail</button>':'')+(/^manual/.test(String(p.cli))?'':'<button class="btn mid" onclick="mover(\''+p.pk+'\')">↪ Mover p/ Atendimentos</button>')+'<button class="btn bad" onclick="recusar(\''+p.pk+'\')">✕ Não enviar</button></div></div>').join(''):'<div class="card empty">Nenhuma proposta esperando aprovação 🎉</div>';return}
 if(TAB=='atend'){let l=cli.slice();const idOf=c=>EM()?c.mail:c.fone;if(BUSCA)l=l.filter(c=>(nomeDe(c)+' '+idOf(c)+' '+(c.empresa||'')+' '+(c.assunto||'')).toLowerCase().includes(BUSCA));
 A.innerHTML='<div class="card" style="padding:10px"><input placeholder="'+(EM()?'Buscar cliente, e-mail ou assunto':'Buscar cliente, empresa ou telefone')+'" value="'+esc(BUSCA)+'" oninput="BUSCA=this.value.toLowerCase();render();const i=document.querySelector(\'#app input\');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div>'+(l.length?l.map(c=>'<div class="card"><div class="row"><h3>'+esc(nomeDe(c))+'</h3><span class="tag '+(c.estado=='humano'?'t-hum':'t-ia')+'">'+(c.estado=='humano'?'Com a equipe':'Com a IA')+'</span><span class="sp"></span><span class="mut">'+dt(c.ult)+'</span></div><div class="mut">'+esc(tel(idOf(c)))+(c.assunto?' · '+esc(c.assunto):'')+(c.empresa?' · '+esc(c.empresa):'')+(c.local?' · '+esc(c.local):'')+'</div>'+(c.resumo?'<div style="margin-top:8px;font-size:14px">'+esc(c.resumo)+'</div>':'')+(c.propostas&&c.propostas.length?'<div class="mut" style="margin-top:6px">Propostas: '+c.propostas.map(p=>'Nº '+esc(p.pk)+' ('+esc(p.total)+(p.pago?' · paga':'')+')').join(', ')+'</div>':'')+(c.hist&&c.hist.length?'<details><summary>Últimas mensagens</summary>'+c.hist.map(m=>'<div class="msg '+(m.r=='Cliente'?'c':'a')+'"><b>'+esc(m.r)+':</b> '+esc(m.x)+'</div>').join('')+'</details>':'')+'<div class="acts">'+(EM()?mailBtns(c.mail,c.thread):'<a class="btn mid" style="text-decoration:none" href="https://wa.me/'+String(c.fone).replace(/\D/g,'')+'" target="_blank">💬 WhatsApp</a>')+(c.estado=='humano'?'<button class="btn mid" onclick="iaRetoma(\''+esc(idOf(c))+'\')">🤖 IA retomar</button>':'')+'<button class="btn mid" onclick="orc(\''+esc(idOf(c))+'\')">📄 Montar proposta</button>'+nvBtn(nomeDe(c),EM()?'':c.fone,(c.resumo?'Atendimento: '+c.resumo+'\n\n':'')+'Novo pedido: ')+'</div></div>').join(''):'<div class="card empty">Nenhum atendimento'+(EM()?' por e-mail':'')+'.</div>');return}
@@ -117,4 +117,99 @@ const mx=Math.max(1,...meses.map(m=>m.e)),W=600,Hh=150,bw=W/6;let svg='<svg clas
 A.innerHTML='<div class="kpis"><div class="kpi"><div class="l">Propostas no mês</div><div class="v">'+mes.length+'</div></div><div class="kpi"><div class="l">Valor proposto</div><div class="v">'+brl(tot)+'</div></div><div class="kpi"><div class="l">Pago no mês</div><div class="v" style="color:var(--ok)">'+brl(totPg)+'</div></div><div class="kpi"><div class="l">Ticket médio</div><div class="v">'+brl(mes.length?tot/mes.length:0)+'</div></div></div><div class="card"><div class="row"><h3>Últimos 6 meses</h3><span class="sp"></span><span class="mut"><span style="color:#00aeef">■</span> enviado <span style="color:#16a34a">■</span> pago</span></div>'+svg+'</div><div class="card"><div class="row"><b>Aguardando aprovação</b><span class="sp"></span><b>'+pend.length+'</b></div><div class="row" style="margin-top:6px"><b>Clientes com a equipe</b><span class="sp"></span><b>'+hum.length+'</b></div><div class="row" style="margin-top:6px"><b>Taxa de pagamento (mês)</b><span class="sp"></span><b>'+(mes.length?Math.round(pg.length/mes.length*100):0)+'%</b></div></div>'}}
 const dlg=document.getElementById('dlg');try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 carregar();setInterval(()=>{if(!document.hidden&&!dlg.open&&TAB!='novo')carregar()},60000);
-</script></body></html>
+</script><script>
+/* ===== Anexos v2: aceita o máximo de formatos ===== */
+(function(){
+const CDN='https://cdnjs.cloudflare.com/ajax/libs/';
+const MAXARQ=10, PDFDIRETO=2.5e6, MAXPAGS=6;
+const ext=f=>((f.name||'').split('.').pop()||'').toLowerCase();
+const aviso=m=>{try{toast(m)}catch(e){alert(m)}};
+function lib(src,glob){return (typeof carregaLib==='function')?carregaLib(src,glob):new Promise((ok,er)=>{if(window[glob])return ok(window[glob]);const s=document.createElement('script');s.src=src;s.onload=()=>ok(window[glob]);s.onerror=er;document.head.appendChild(s)})}
+const ler=(f,m)=>new Promise((ok,er)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=er;m==='url'?r.readAsDataURL(f):m==='txt'?r.readAsText(f):r.readAsArrayBuffer(f)});
+async function paraJpeg(blob){
+  const u=URL.createObjectURL(blob);
+  try{const im=new Image();await new Promise((ok,er)=>{im.onload=ok;im.onerror=er;im.src=u});
+    const w=im.naturalWidth||1200,h=im.naturalHeight||900,s=Math.min(1,1600/Math.max(w,h));
+    const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);
+    const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(im,0,0,cv.width,cv.height);
+    return cv.toDataURL('image/jpeg',0.82);}finally{URL.revokeObjectURL(u)}
+}
+async function pdfjs(){const p=await lib(CDN+'pdf.js/3.11.174/pdf.min.js','pdfjsLib');p.GlobalWorkerOptions.workerSrc=CDN+'pdf.js/3.11.174/pdf.worker.min.js';return p}
+async function lerPdf(buf){
+  const p=await pdfjs();const d=await p.getDocument({data:new Uint8Array(buf)}).promise;
+  let tx='';for(let i=1;i<=Math.min(d.numPages,40);i++){const c=await(await d.getPage(i)).getTextContent();tx+=c.items.map(x=>x.str).join(' ')+'\n'}
+  const imgs=[];for(let i=1;i<=Math.min(d.numPages,MAXPAGS);i++){const pg=await d.getPage(i);const v=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2.5,1600/Math.max(v.width,v.height))});
+    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+    await pg.render({canvasContext:g,viewport:vp}).promise;imgs.push(cv.toDataURL('image/jpeg',0.8))}
+  return {tx:tx.trim(),imgs,pags:d.numPages};
+}
+async function zipTexto(buf,filtro,ordem){
+  const Z=await lib(CDN+'jszip/3.10.1/jszip.min.js','JSZip');const z=await Z.loadAsync(buf);
+  let nomes=Object.keys(z.files).filter(n=>filtro.test(n));if(ordem)nomes.sort((a,b)=>(parseInt(a.replace(/\D+/g,''))||0)-(parseInt(b.replace(/\D+/g,''))||0));
+  let t='';for(const n of nomes){const x=await z.file(n).async('string');t+=x.replace(/<\/(a:p|text:p|w:p|text:h)>/g,'\n').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/[ \t]+/g,' ')+'\n'}
+  return t.trim();
+}
+function textoBruto(buf){ // extrai trechos legíveis de arquivos binários (.doc, .cdr, .msg...)
+  const u=new Uint8Array(buf);let out=[],cur='';
+  for(let i=0;i<u.length&&out.length<4000;i++){const c=u[i];if((c>=32&&c<127)||c>=192||c===10){cur+=String.fromCharCode(c)}else{if(cur.trim().length>=5)out.push(cur.trim());cur=''}}if(cur.trim().length>=5)out.push(cur.trim());
+  let cur2='';for(let i=0;i+1<u.length&&out.length<8000;i+=2){const c=u[i]|(u[i+1]<<8);if(c>=32&&c<0x2000){cur2+=String.fromCharCode(c)}else{if(cur2.trim().length>=5)out.push(cur2.trim());cur2=''}}
+  return out.filter(s=>/[a-zA-ZÀ-ú]{3}/.test(s)&&!/^[\W\d_]+$/.test(s)).join('\n').slice(0,20000);
+}
+function rtfTexto(s){return s.replace(/\\par[d]?/g,'\n').replace(/\\'([0-9a-f]{2})/gi,(m,h)=>String.fromCharCode(parseInt(h,16))).replace(/\\[a-z]+-?\d* ?/gi,'').replace(/[{}]/g,'').trim()}
+const ehImg=(f,e)=>/^image\//.test(f.type)||/^(jpe?g|png|gif|webp|bmp|svg|ico|avif|jfif|pjpeg|tiff?|heic|heif)$/.test(e);
+const pdfMagic=async f=>{try{const b=new Uint8Array(await f.slice(0,5).arrayBuffer());return String.fromCharCode(...b)==='%PDF-'}catch(e){return false}};
+
+window.addImgs=async function(inp){
+  const fs=[...(inp.files||[])];if(inp)try{inp.value=''}catch(e){}
+  if(!fs.length)return;
+    const tot=()=>IMGS.length+DOCS.length+TXTS.length;
+  aviso('⏳ Lendo '+fs.length+' arquivo(s)...');
+  const falhas=[];
+  for(const f of fs){
+    if(tot()>=MAXARQ+6){aviso('Limite de anexos atingido.');break}
+    const e=ext(f);
+    try{
+      if(f.size>60e6){falhas.push(f.name+' (maior que 60 MB)');continue}
+      // PDF (e .ai/.eps salvos com PDF dentro)
+      if(f.type.includes('pdf')||e==='pdf'||((e==='ai'||e==='eps'||!f.type)&&await pdfMagic(f))){
+        const buf=await ler(f,'buf');let info=null;
+        try{info=await lerPdf(buf.slice(0))}catch(x){}
+        if(f.size<=PDFDIRETO){DOCS.push({nome:f.name.replace(/\.(ai|eps)$/i,'.pdf'),b64:await ler(new Blob([buf],{type:'application/pdf'}),'url')});
+          if(info&&info.tx)TXTS.push({nome:f.name,texto:info.tx.slice(0,15000)})}
+        else if(info){info.imgs.forEach((u,i)=>IMGS.push(u));TXTS.push({nome:f.name+' ('+info.pags+' pág.'+(info.pags>MAXPAGS?', primeiras '+MAXPAGS+' viraram imagem':'')+')',texto:info.tx.slice(0,20000)||'(PDF sem texto — só imagens)'})}
+        else falhas.push(f.name+' (PDF protegido ou corrompido)');
+        continue;
+      }
+      if(ehImg(f,e)){
+        let blob=f;
+        if(/^(heic|heif)$/.test(e)||/hei[cf]/.test(f.type)){const H=await lib('https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js','heic2any');blob=await H({blob:f,toType:'image/jpeg',quality:0.85});if(Array.isArray(blob))blob=blob[0]}
+        if(/^tiff?$/.test(e)){const U=await lib('https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js','UTIF');const b=await ler(f,'buf');const ifd=U.decode(b);U.decodeImage(b,ifd[0]);const rgba=U.toRGBA8(ifd[0]);const cv=document.createElement('canvas');cv.width=ifd[0].width;cv.height=ifd[0].height;cv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba),cv.width,cv.height),0,0);blob=await new Promise(ok=>cv.toBlob(ok,'image/png'))}
+        IMGS.push(await paraJpeg(blob));continue;
+      }
+      if(/^(xlsx|xlsm|xlsb|xls|ods|numbers|csv|tsv|fods)$/.test(e)){
+        const X=await lib(CDN+'xlsx/0.18.5/xlsx.full.min.js','XLSX');const wb=X.read(await ler(f,'buf'),{type:'array'});
+        TXTS.push({nome:f.name,texto:wb.SheetNames.map(n=>'Planilha '+n+':\n'+X.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n').slice(0,20000)});continue;
+      }
+      if(e==='docx'||e==='docm'||e==='dotx'){const M=await lib(CDN+'mammoth/1.6.0/mammoth.browser.min.js','mammoth');const r=await M.extractRawText({arrayBuffer:await ler(f,'buf')});TXTS.push({nome:f.name,texto:r.value.slice(0,20000)});continue}
+      if(/^(pptx|ppsx|pptm|potx)$/.test(e)){const buf=await ler(f,'buf');TXTS.push({nome:f.name,texto:(await zipTexto(buf,/^ppt\/slides\/slide\d+\.xml$/,true)).slice(0,20000)||'(apresentação sem texto)'});
+        try{const Z=await lib(CDN+'jszip/3.10.1/jszip.min.js','JSZip');const z=await Z.loadAsync(buf);const ms=Object.keys(z.files).filter(n=>/^ppt\/media\/.+\.(png|jpe?g|gif|bmp|webp)$/i.test(n)).map(n=>({n,sz:z.files[n]._data&&z.files[n]._data.uncompressedSize||0})).sort((a,b)=>b.sz-a.sz).slice(0,4);
+          for(const m of ms){const bl=await z.file(m.n).async('blob');IMGS.push(await paraJpeg(bl))}}catch(x){console.warn('pptx imgs',x)}
+        continue}
+      if(/^(odt|odp|ott)$/.test(e)){TXTS.push({nome:f.name,texto:(await zipTexto(await ler(f,'buf'),/^content\.xml$/)).slice(0,20000)});continue}
+      if(e==='rtf'){TXTS.push({nome:f.name,texto:rtfTexto(await ler(f,'txt')).slice(0,20000)});continue}
+      if(/^(html?|xml|svgz)$/.test(e)){const d=new DOMParser().parseFromString(await ler(f,'txt'),'text/html');TXTS.push({nome:f.name,texto:(d.body?d.body.innerText:'').slice(0,20000)});continue}
+      if(/^text\//.test(f.type)||/^(txt|md|json|eml|log|ini|vcf)$/.test(e)){TXTS.push({nome:f.name,texto:(await ler(f,'txt')).slice(0,20000)});continue}
+      // Qualquer outro formato (.doc, .cdr, .psd, .msg, .pages, .zip...): tenta tirar texto legível
+      const t=textoBruto(await ler(f,'buf'));
+      TXTS.push({nome:f.name,texto:t.length>30?t:'(arquivo '+e.toUpperCase()+' anexado — formato sem texto legível; considerar só o nome do arquivo)'});
+    }catch(x){console.error('anexo',f.name,x);falhas.push(f.name)}
+  }
+  try{verImgs()}catch(e){}
+  aviso(falhas.length?'⚠️ Não consegui ler: '+falhas.join(', '):'✅ Arquivo(s) anexado(s)');
+};
+// libera qualquer formato no seletor de arquivo
+const libera=()=>document.querySelectorAll('input[type=file][onchange*="addImgs"]').forEach(i=>{if(i.accept)i.removeAttribute('accept');i.multiple=true});
+let _lb=0;libera();new MutationObserver(()=>{if(_lb)return;_lb=1;requestAnimationFrame(()=>{_lb=0;libera()})}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+</body></html>

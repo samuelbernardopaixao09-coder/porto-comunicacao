@@ -34,7 +34,58 @@ dialog{border:0;border-radius:16px;padding:0;width:min(460px,94vw)}dialog::backd
 .login{max-width:340px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}.login input{margin:12px 0}
 .svg text{font-size:10px;fill:#6b7280}
 @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}header small{display:none}.kpi .v{font-size:17px}nav{top:60px}}
-</style></head><body>
+</style><style id="tema-azul">
+/* ===== Tema A azul (Porto) ===== */
+:root{--az:#0b4ea2;--az2:#083b7c;--azc:#c9d8f2;--top:#0b4ea2;--bg:#f2f5fa;--pri:#e6007e}
+body{background:var(--bg)}
+header{background:var(--az);box-shadow:none;padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top))}
+.logo{width:42px;height:42px;border-radius:12px;background:#fff url(icon-192.png) center/88% no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+header h1{font-size:15px;letter-spacing:.03em}header small{color:#b9cdef}
+header .btn.gh{border:0;background:rgba(255,255,255,.14);color:#fff;width:38px;height:38px;padding:0;border-radius:10px;font-size:18px}
+nav{background:var(--az);border-bottom:0;padding:2px 14px 12px;top:66px;position:sticky}
+nav::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#00aeef 0 25%,#e6007e 25% 50%,#ffd200 50% 75%,#111827 75%)}
+nav button{color:var(--azc);border-radius:10px;padding:8px 13px}
+nav button:hover{background:rgba(255,255,255,.1);color:#fff}
+nav button.on{background:#fff;color:var(--az)}
+nav .chs{background:rgba(255,255,255,.12)}nav .chs button{color:#e3ecfa;border-radius:999px}nav .chs button.on{background:var(--pri);color:#fff}
+nav .sep{background:rgba(255,255,255,.22)}
+nav .mut{color:var(--azc)!important}
+nav .ct{background:var(--pri)}
+main{padding-top:18px}
+.card{border:0;border-left:4px solid var(--pri);border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.1)}
+body.em .card{border-left-color:#00aeef}
+.card.empty,.card[style*="padding:10px"]{border-left:0}
+.kpi{border:0;border-top:3px solid var(--pri);box-shadow:0 1px 3px rgba(16,24,40,.08)}
+.kpis .kpi:nth-child(2){border-top-color:#00aeef}.kpis .kpi:nth-child(3){border-top-color:#ffd200}.kpis .kpi:nth-child(4){border-top-color:#111827}
+.big{color:var(--az2)}
+.btn{border-radius:10px;font-weight:700}
+.btn.ok{background:var(--pri);color:#fff}
+.btn.mid{background:#eef2f8;color:var(--az2);border:0}
+.btn.mid:hover{background:#e2e9f4}
+.btn.bad{background:#fff;border:1px solid #fecaca}
+input:focus,textarea:focus,select:focus{outline:2px solid #9cc0f0;border-color:var(--az)}
+details summary{color:var(--az)}
+#toast{background:var(--az2)}
+.login{border:0;box-shadow:0 12px 40px rgba(8,59,124,.25)}
+body.tela-login{background:linear-gradient(160deg,#0b4ea2 0,#083b7c 60%,#06264f 100%);min-height:100vh}
+body.tela-login .login h3{color:var(--az2)}
+#bnav{display:none}
+@media(max-width:760px){
+ header{padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top))}
+ nav{top:62px;padding:0 10px 10px}
+ nav button.tb-main{display:none}
+ #bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--az);justify-content:space-around;padding:8px 4px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.12)}
+ #bnav button{flex:1;border:0;background:transparent;color:var(--azc);display:flex;flex-direction:column;align-items:center;gap:3px;font:600 10.5px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:5px 2px;border-radius:12px;position:relative;margin:0 2px}
+ #bnav button.on{color:#fff;background:rgba(255,255,255,.16)}
+ #bnav svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ #bnav .ct{position:absolute;top:0;right:calc(50% - 22px);background:var(--pri);color:#fff;border-radius:9px;font-size:10.5px;line-height:17px;min-width:17px;padding:0 4px}
+ main{padding-bottom:96px}
+ #toast{bottom:92px}
+ #chFab{display:none!important}
+ #chBox{bottom:84px!important;height:calc(100vh - 160px)!important}
+}
+</style>
+</head><body>
 <header><div class="logo"></div><h1>PORTO COMUNICAÇÃO<small>Atendimento · propostas · pedidos</small></h1><div class="sp"></div><button class="btn gh" onclick="carregar()">↻</button></header>
 <nav id="nav"></nav>
 <main id="app"><div class="empty">Carregando…</div></main>
@@ -356,6 +407,27 @@ $('chIn').addEventListener('paste',e=>{const fs=[...((e.clipboardData||{}).files
 box.addEventListener('dragover',e=>{e.preventDefault();box.style.outline='3px dashed #0b5cad'});box.addEventListener('dragleave',()=>box.style.outline='');box.addEventListener('drop',e=>{e.preventDefault();box.style.outline='';const fs=[...((e.dataTransfer||{}).files||[])];if(fs.length)anexar({files:fs})});
 $('chIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar()}});
 $('chIn').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(120,e.target.scrollHeight)+'px'});
+})();
+</script>
+<script>
+/* ===== Tema A azul: barra de baixo no celular ===== */
+(function(){
+const IC={aprovar:'<path d="M20 6 9 17l-5-5"/>',atend:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',pedidos:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',novo:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',ia:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/>'};
+function bnav(){
+  try{document.body.classList.toggle('em',typeof EM==='function'&&EM());document.body.classList.remove('tela-login')}catch(e){}
+  const nav=document.getElementById('nav');let cont={};
+  if(nav)nav.querySelectorAll('button').forEach(b=>{const m=String(b.getAttribute('onclick')||'').match(/setTab\('(\w+)'\)/);if(m&&['aprovar','atend','pedidos','novo'].includes(m[1])){b.classList.add('tb-main');const c=b.querySelector('.ct');cont[m[1]]=c?c.textContent:''}});
+  let el=document.getElementById('bnav');if(!el){el=document.createElement('div');el.id='bnav';document.body.appendChild(el)}
+  const T=typeof TAB!=='undefined'?TAB:'';
+  const it=[['aprovar','Aprovar'],['atend','Atendim.'],['pedidos','Pedidos'],['novo','Orçamento'],['ia','Assistente']];
+  el.innerHTML=it.map(([k,n])=>'<button class="'+(T===k?'on':'')+'" data-k="'+k+'"><svg viewBox="0 0 24 24">'+IC[k]+'</svg>'+n+(cont[k]?'<span class="ct">'+cont[k]+'</span>':'')+'</button>').join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==='ia'){const f=document.getElementById('chFab');if(f)f.click();return}setTab(k)});
+  el.style.display='';
+}
+const r0=window.render;if(typeof r0==='function'){window.render=function(){const x=r0.apply(this,arguments);try{bnav()}catch(e){}return x}}
+const l0=window.login;if(typeof l0==='function'){window.login=function(){const x=l0.apply(this,arguments);try{document.body.classList.add('tela-login');const b=document.getElementById('bnav');if(b)b.style.display='none'}catch(e){}return x}}
+try{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content='#0b4ea2';else{const n=document.createElement('meta');n.name='theme-color';n.content='#0b4ea2';document.head.appendChild(n)}}catch(e){}
+try{if(document.querySelector('.login'))window.login&&document.body.classList.add('tela-login');else if(typeof D!=='undefined'&&D)bnav()}catch(e){}
 })();
 </script>
 </body></html>

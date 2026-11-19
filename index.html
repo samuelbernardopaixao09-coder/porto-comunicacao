@@ -435,20 +435,23 @@ try{if(document.querySelector('.login'))window.login&&document.body.classList.ad
 /* ===== Menu lateral com ícones (computador) ===== */
 #rail{display:none}
 @media(min-width:761px){
- body.tem-rail nav{margin-left:88px;z-index:7}
- body.tem-rail #rail{display:flex;flex-direction:column;align-items:center;gap:2px;position:fixed;left:0;top:66px;bottom:0;width:88px;background:var(--az);padding:14px 0 16px;z-index:6;overflow-y:auto;scrollbar-width:none}
+ body.tem-rail nav{margin-left:72px;z-index:7}
+ body.tem-rail #rail{display:flex;flex-direction:column;align-items:center;gap:2px;position:fixed;left:0;top:66px;bottom:0;width:72px;background:var(--az);padding:14px 0 16px;z-index:8;scrollbar-width:none}
  body.tem-rail #rail::-webkit-scrollbar{display:none}
- body.tem-rail main{margin-left:88px;max-width:none;padding-left:24px;padding-right:24px}
+ body.tem-rail main{margin-left:72px;max-width:none;padding-left:24px;padding-right:24px}
  body.tem-rail main>*{max-width:1000px}
- #rail .rb{position:relative;width:72px;border:0;background:transparent;color:var(--azc);display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 6px;border-radius:14px;cursor:pointer;font:600 11px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;transition:background .15s,color .15s}
+ #rail .rb{position:relative;width:52px;height:50px;border:0;background:transparent;color:var(--azc);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;border-radius:14px;cursor:pointer;font:600 11px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;transition:background .15s,color .15s}
  #rail .rb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s cubic-bezier(.3,1.6,.5,1)}
  #rail .rb:hover{color:#fff;background:rgba(255,255,255,.1)}
  #rail .rb:hover svg{transform:scale(1.4)}
  #rail .rb.on{background:#fff;color:var(--az)}
  #rail .rb.ch.on{background:var(--pri);color:#fff}
- #rail .ct{position:absolute;top:3px;right:10px;background:var(--pri);color:#fff;border-radius:9px;font-size:10.5px;line-height:17px;min-width:17px;padding:0 4px;text-align:center}
+ #rail .ct{position:absolute;top:2px;right:2px;background:var(--pri);color:#fff;border-radius:9px;font-size:10.5px;line-height:17px;min-width:17px;padding:0 4px;text-align:center}
  #rail .rb.ch.on .ct{background:#fff;color:var(--pri)}
- #rail .sepr{width:46px;height:1px;background:rgba(255,255,255,.22);margin:4px 0;flex:none}
+ #rail .lb{position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%) translateX(-6px);background:#111827;color:#fff;padding:7px 11px;border-radius:9px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;font:600 12.5px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:30}
+ #rail .lb::before{content:"";position:absolute;left:-5px;top:50%;transform:translateY(-50%) rotate(45deg);width:10px;height:10px;background:#111827}
+ #rail .rb:hover .lb{opacity:1;transform:translateY(-50%) translateX(0)}
+ #rail .sepr{width:36px;height:1px;background:rgba(255,255,255,.22);margin:4px 0;flex:none}
  #rail .fim{margin-top:auto}
  #rail .quem{font:600 10px system-ui,sans-serif;color:var(--azc);text-align:center;padding:4px 2px;max-width:80px;overflow:hidden;text-overflow:ellipsis}
 }
@@ -469,7 +472,7 @@ const IC={
  ia:S('<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/>'),
  sair:S('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>')
 };
-const NOME={wa:'WhatsApp',mail:'E-mail',aprovar:'Aprovar',novo:'Orçamento',atend:'Atendim.',pedidos:'Pedidos',vendas:'Vendas',usuarios:'Usuários',sair:'Sair'};
+const NOME={wa:'WhatsApp',mail:'E-mail',aprovar:'Aprovar',novo:'Novo orçamento',atend:'Atendimentos',pedidos:'Pedidos',vendas:'Vendas',usuarios:'Usuários',sair:'Sair'};
 function rail(){
  const nav=document.getElementById('nav');if(!nav||!nav.children.length)return;
  let el=document.getElementById('rail');if(!el){el=document.createElement('div');el.id='rail';document.body.appendChild(el)}
@@ -479,8 +482,8 @@ function rail(){
    if(!k||!IC[k])return;const c=b.querySelector('.ct');itens.push({k,ch,on:b.classList.contains('on'),ct:c?c.textContent:'',btn:b})});
  const q=nav.querySelector('.mut');if(q)quem=q.textContent.replace(/^\W+/,'').trim();
  const chs=itens.filter(i=>i.ch),tabs=itens.filter(i=>!i.ch&&i.k!=='sair'),sair=itens.find(i=>i.k==='sair');
- const bt=i=>'<button class="rb'+(i.ch?' ch':'')+(i.on?' on':'')+'" data-k="'+i.k+'" title="'+NOME[i.k]+'">'+IC[i.k]+NOME[i.k]+(i.ct?'<span class="ct">'+i.ct+'</span>':'')+'</button>';
- el.innerHTML=chs.map(bt).join('')+'<div class="sepr"></div>'+tabs.map(bt).join('')+'<div class="sepr"></div><button class="rb" data-k="ia" title="Assistente">'+IC.ia+'Assistente</button><div class="fim"></div>'+(sair?bt(sair).replace('title="Sair"','title="Sair'+(quem?' ('+quem+')':'')+'"'):'');
+ const bt=i=>'<button class="rb'+(i.ch?' ch':'')+(i.on?' on':'')+'" data-k="'+i.k+'" aria-label="'+NOME[i.k]+'">'+IC[i.k]+'<span class="lb">'+NOME[i.k]+'</span>'+(i.ct?'<span class="ct">'+i.ct+'</span>':'')+'</button>';
+ el.innerHTML=chs.map(bt).join('')+'<div class="sepr"></div>'+tabs.map(bt).join('')+'<div class="sepr"></div><button class="rb" data-k="ia" aria-label="Assistente">'+IC.ia+'<span class="lb">Assistente</span></button><div class="fim"></div>'+(sair?bt(sair).replace('>Sair</span>','>Sair'+(quem?' ('+quem+')':'')+'</span>'):'');
  const mapa={};itens.forEach(i=>mapa[i.k]=i.btn);
  el.querySelectorAll('.rb').forEach(r=>r.onclick=()=>{const k=r.dataset.k;if(k==='ia'){const f=document.getElementById('chFab');if(f)f.click();return}const o=mapa[k];if(o)o.click()});
  document.body.classList.add('tem-rail');

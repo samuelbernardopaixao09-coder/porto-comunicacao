@@ -129,13 +129,19 @@ const ler=(f,m)=>new Promise((ok,er)=>{const r=new FileReader();r.onload=()=>ok(
 window.__LEG=window.__LEG||{};
 const legKey=u=>u.length+':'+u.slice(-48);
 function pushImg(u,leg){if(!u||IMGS.length>=16)return false;if(IMGS.some(x=>x.length===u.length&&x.slice(-200)===u.slice(-200)))return false;IMGS.push(u);window.__LEG[legKey(u)]=String(leg||'').slice(0,120);return true}
+function finalJpeg(cv){let c=cv;const mn=Math.min(c.width,c.height);
+  if(mn>0&&mn<700){const f=Math.min(2.2,1100/mn);const u=document.createElement('canvas');u.width=Math.round(c.width*f);u.height=Math.round(c.height*f);const g=u.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(c,0,0,u.width,u.height);
+    try{const id=g.getImageData(0,0,u.width,u.height);const s=id.data,o=new Uint8ClampedArray(s),W=u.width,Hh=u.height,k=0.55;
+      for(let y=1;y<Hh-1;y++)for(let x=1;x<W-1;x++){const i=(y*W+x)*4;for(let ch=0;ch<3;ch++){const v=s[i+ch];o[i+ch]=v+k*(4*v-s[i+ch-4]-s[i+ch+4]-s[i+ch-W*4]-s[i+ch+W*4])}}
+      id.data.set(o);g.putImageData(id,0,0)}catch(e){}c=u}
+  let q=0.86,r=c.toDataURL('image/jpeg',q);while(r.length>1150000&&q>0.5){q-=0.1;r=c.toDataURL('image/jpeg',q)}return r}
 async function paraJpeg(blob){
   const u=URL.createObjectURL(blob);
   try{const im=new Image();await new Promise((ok,er)=>{im.onload=ok;im.onerror=er;im.src=u});
-    const w=im.naturalWidth||1200,h=im.naturalHeight||900,s=Math.min(1,1400/Math.max(w,h));
+    const w=im.naturalWidth||1200,h=im.naturalHeight||900,s=Math.min(1,2000/Math.max(w,h));
     const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);
     const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(im,0,0,cv.width,cv.height);
-    return cv.toDataURL('image/jpeg',0.8);}finally{URL.revokeObjectURL(u)}
+    return finalJpeg(cv);}finally{URL.revokeObjectURL(u)}
 }
 async function pdfjs(){const p=await lib(CDN+'pdf.js/3.11.174/pdf.min.js','pdfjsLib');p.GlobalWorkerOptions.workerSrc=CDN+'pdf.js/3.11.174/pdf.worker.min.js';return p}
 async function abrirPdf(buf){
@@ -143,15 +149,15 @@ async function abrirPdf(buf){
   let tx='';for(let i=1;i<=Math.min(d.numPages,40);i++){const c=await(await d.getPage(i)).getTextContent();tx+=c.items.map(x=>x.str).join(' ')+'\n'}
   return {d,tx:tx.trim(),pags:d.numPages};
 }
-async function renderPags(d,n){const out=[];for(let i=1;i<=Math.min(d.numPages,n);i++){const pg=await d.getPage(i);const v=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2.5,1400/Math.max(v.width,v.height))});
+async function renderPags(d,n){const out=[];for(let i=1;i<=Math.min(d.numPages,n);i++){const pg=await d.getPage(i);const v=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(3,2000/Math.max(v.width,v.height))});
     const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
     await pg.render({canvasContext:g,viewport:vp}).promise;out.push(cv.toDataURL('image/jpeg',0.78))}return out}
-function objParaJpeg(o){if(!o)return null;const w=o.width,h=o.height;if(!w||!h||w<250||h<180||w*h<120000)return null;const s=Math.min(1,1400/Math.max(w,h));const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+function objParaJpeg(o){if(!o)return null;const w=o.width,h=o.height;if(!w||!h||w<250||h<180||w*h<120000)return null;const s=Math.min(1,2000/Math.max(w,h));const cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
   if(o.bitmap){g.drawImage(o.bitmap,0,0,cv.width,cv.height)}else if(o.data){const t=document.createElement('canvas');t.width=w;t.height=h;const id=t.getContext('2d').createImageData(w,h);const D=id.data,S=o.data;
     if(o.kind===3){for(let q=0;q<D.length;q++)D[q]=S[q]}else if(o.kind===2){for(let a=0,b=0;b<D.length;a+=3,b+=4){D[b]=S[a];D[b+1]=S[a+1];D[b+2]=S[a+2];D[b+3]=255}}else if(o.kind===1){const rb=(w+7)>>3;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const bit=(S[y*rb+(x>>3)]>>(7-(x&7)))&1;const b=(y*w+x)*4;const v=bit?255:0;D[b]=D[b+1]=D[b+2]=v;D[b+3]=255}}else return null;
     t.getContext('2d').putImageData(id,0,0);g.drawImage(t,0,0,cv.width,cv.height)}else return null;
   try{const px=g.getImageData(0,0,cv.width,cv.height).data;let mn=255,mx=0;for(let q=0;q<px.length;q+=4*97){const v=px[q]*.3+px[q+1]*.59+px[q+2]*.11;if(v<mn)mn=v;if(v>mx)mx=v}if(mx-mn<25)return null}catch(e){}
-  return cv.toDataURL('image/jpeg',0.8)}
+  return finalJpeg(cv)}
 async function imgsEmbutidas(d,nome){const p=window.pdfjsLib;const out=[];const vistos=new Set();
   for(let i=1;i<=Math.min(d.numPages,20)&&out.length<6;i++){let pg,ops;try{pg=await d.getPage(i);ops=await pg.getOperatorList()}catch(e){continue}
     for(let k=0;k<ops.fnArray.length&&out.length<6;k++){const fn=ops.fnArray[k];if(fn!==p.OPS.paintImageXObject&&fn!==p.OPS.paintJpegXObject)continue;const id=ops.argsArray[k][0];if(typeof id!=='string'||vistos.has(id))continue;vistos.add(id);

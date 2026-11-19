@@ -435,9 +435,8 @@ try{if(document.querySelector('.login'))window.login&&document.body.classList.ad
 /* ===== Menu lateral com ícones (computador) ===== */
 #rail{display:none}
 @media(min-width:761px){
- body.tem-rail nav{display:none!important}
- body.tem-rail header::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#00aeef 0 25%,#e6007e 25% 50%,#ffd200 50% 75%,#111827 75%)}
- body.tem-rail #rail{display:flex;flex-direction:column;align-items:center;gap:2px;position:fixed;left:0;top:70px;bottom:0;width:88px;background:var(--az);padding:14px 0 16px;z-index:6;overflow-y:auto;scrollbar-width:none}
+ body.tem-rail nav{margin-left:88px;z-index:7}
+ body.tem-rail #rail{display:flex;flex-direction:column;align-items:center;gap:2px;position:fixed;left:0;top:66px;bottom:0;width:88px;background:var(--az);padding:14px 0 16px;z-index:6;overflow-y:auto;scrollbar-width:none}
  body.tem-rail #rail::-webkit-scrollbar{display:none}
  body.tem-rail main{margin-left:88px;max-width:none;padding-left:24px;padding-right:24px}
  body.tem-rail main>*{max-width:1000px}

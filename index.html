@@ -431,4 +431,64 @@ try{const m=document.querySelector('meta[name="theme-color"]');if(m)m.content='#
 try{if(document.querySelector('.login'))window.login&&document.body.classList.add('tela-login');else if(typeof D!=='undefined'&&D)bnav()}catch(e){}
 })();
 </script>
+<style id="tema-rail">
+/* ===== Menu lateral com ícones (computador) ===== */
+#rail{display:none}
+@media(min-width:761px){
+ body.tem-rail nav{display:none!important}
+ body.tem-rail header::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#00aeef 0 25%,#e6007e 25% 50%,#ffd200 50% 75%,#111827 75%)}
+ body.tem-rail #rail{display:flex;flex-direction:column;align-items:center;gap:2px;position:fixed;left:0;top:70px;bottom:0;width:88px;background:var(--az);padding:14px 0 16px;z-index:6;overflow-y:auto;scrollbar-width:none}
+ body.tem-rail #rail::-webkit-scrollbar{display:none}
+ body.tem-rail main{margin-left:88px;max-width:none;padding-left:24px;padding-right:24px}
+ body.tem-rail main>*{max-width:1000px}
+ #rail .rb{position:relative;width:72px;border:0;background:transparent;color:var(--azc);display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 6px;border-radius:14px;cursor:pointer;font:600 11px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;transition:background .15s,color .15s}
+ #rail .rb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s cubic-bezier(.3,1.6,.5,1)}
+ #rail .rb:hover{color:#fff;background:rgba(255,255,255,.1)}
+ #rail .rb:hover svg{transform:scale(1.4)}
+ #rail .rb.on{background:#fff;color:var(--az)}
+ #rail .rb.ch.on{background:var(--pri);color:#fff}
+ #rail .ct{position:absolute;top:3px;right:10px;background:var(--pri);color:#fff;border-radius:9px;font-size:10.5px;line-height:17px;min-width:17px;padding:0 4px;text-align:center}
+ #rail .rb.ch.on .ct{background:#fff;color:var(--pri)}
+ #rail .sepr{width:46px;height:1px;background:rgba(255,255,255,.22);margin:4px 0;flex:none}
+ #rail .fim{margin-top:auto}
+ #rail .quem{font:600 10px system-ui,sans-serif;color:var(--azc);text-align:center;padding:4px 2px;max-width:80px;overflow:hidden;text-overflow:ellipsis}
+}
+</style>
+<script>
+/* ===== Menu lateral com ícones (computador) ===== */
+(function(){
+const S=p=>'<svg viewBox="0 0 24 24">'+p+'</svg>';
+const IC={
+ wa:S('<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"/>'),
+ mail:S('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
+ aprovar:S('<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'),
+ novo:S('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/>'),
+ atend:S('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/>'),
+ pedidos:S('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'),
+ vendas:S('<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/>'),
+ usuarios:S('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5.5 5"/>'),
+ ia:S('<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6"/>'),
+ sair:S('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>')
+};
+const NOME={wa:'WhatsApp',mail:'E-mail',aprovar:'Aprovar',novo:'Orçamento',atend:'Atendim.',pedidos:'Pedidos',vendas:'Vendas',usuarios:'Usuários',sair:'Sair'};
+function rail(){
+ const nav=document.getElementById('nav');if(!nav||!nav.children.length)return;
+ let el=document.getElementById('rail');if(!el){el=document.createElement('div');el.id='rail';document.body.appendChild(el)}
+ const itens=[];let quem='';
+ nav.querySelectorAll('button').forEach(b=>{const oc=String(b.getAttribute('onclick')||'');let k=null,ch=false;
+   let m=oc.match(/setCh\('(\w+)'\)/);if(m){k=m[1];ch=true}else{m=oc.match(/setTab\('(\w+)'\)/);if(m)k=m[1];else if(/sair\(/.test(oc))k='sair'}
+   if(!k||!IC[k])return;const c=b.querySelector('.ct');itens.push({k,ch,on:b.classList.contains('on'),ct:c?c.textContent:'',btn:b})});
+ const q=nav.querySelector('.mut');if(q)quem=q.textContent.replace(/^\W+/,'').trim();
+ const chs=itens.filter(i=>i.ch),tabs=itens.filter(i=>!i.ch&&i.k!=='sair'),sair=itens.find(i=>i.k==='sair');
+ const bt=i=>'<button class="rb'+(i.ch?' ch':'')+(i.on?' on':'')+'" data-k="'+i.k+'" title="'+NOME[i.k]+'">'+IC[i.k]+NOME[i.k]+(i.ct?'<span class="ct">'+i.ct+'</span>':'')+'</button>';
+ el.innerHTML=chs.map(bt).join('')+'<div class="sepr"></div>'+tabs.map(bt).join('')+'<div class="sepr"></div><button class="rb" data-k="ia" title="Assistente">'+IC.ia+'Assistente</button><div class="fim"></div>'+(sair?bt(sair).replace('title="Sair"','title="Sair'+(quem?' ('+quem+')':'')+'"'):'');
+ const mapa={};itens.forEach(i=>mapa[i.k]=i.btn);
+ el.querySelectorAll('.rb').forEach(r=>r.onclick=()=>{const k=r.dataset.k;if(k==='ia'){const f=document.getElementById('chFab');if(f)f.click();return}const o=mapa[k];if(o)o.click()});
+ document.body.classList.add('tem-rail');
+}
+const r1=window.render;if(typeof r1==='function'){window.render=function(){const x=r1.apply(this,arguments);try{rail()}catch(e){console.warn('rail',e)}return x}}
+const l1=window.login;if(typeof l1==='function'){window.login=function(){const x=l1.apply(this,arguments);try{document.body.classList.remove('tem-rail');const r=document.getElementById('rail');if(r)r.innerHTML=''}catch(e){}return x}}
+try{if(!document.querySelector('.login'))rail()}catch(e){}
+})();
+</script>
 </body></html>

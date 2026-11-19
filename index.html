@@ -271,4 +271,83 @@ if(ia){ED.orc=j.orc;edRender();toast('🤖 Ajuste aplicado — novo total '+j.to
 if(!ia){try{setTab('aprovar')}catch(e){}}setTimeout(carregar,800)}
 catch(e){toast('Erro: '+e.message)}finally{[bS,bI].forEach(b=>b&&(b.disabled=false));lb.textContent=old}}
 </script>
+<script>
+/* ===== Assistente (chat IA da equipe) ===== */
+(function(){
+let H=[];try{H=JSON.parse(localStorage.getItem('pchat')||'[]')}catch(e){}
+let ocupado=false,ANX={imgs:[],docs:[],txts:[],legs:{}},ULT=null;
+const vazio=()=>({imgs:[],docs:[],txts:[],legs:{}});
+const salvar=()=>{try{localStorage.setItem('pchat',JSON.stringify(H.slice(-40)))}catch(e){}};
+const es=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const md=s=>es(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^\s*[-•]\s+/gm,'• ').replace(/\n/g,'<br>');
+const css=document.createElement('style');css.textContent=`
+#chFab{position:fixed;right:18px;bottom:18px;z-index:9998;width:58px;height:58px;border-radius:50%;border:none;background:#0b5cad;color:#fff;font-size:27px;box-shadow:0 6px 20px rgba(0,0,0,.3);cursor:pointer}
+#chBox{position:fixed;right:18px;bottom:86px;z-index:9999;width:min(420px,calc(100vw - 24px));height:min(640px,calc(100vh - 110px));background:#fff;color:#111;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.35);display:none;flex-direction:column;overflow:hidden;font-size:14px}
+#chBox.on{display:flex}
+#chHd{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#0b5cad;color:#fff}
+#chHd b{flex:1;font-size:15px}#chHd button{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:13px}
+#chMs{flex:1;overflow:auto;padding:12px;background:#f4f6f9;display:flex;flex-direction:column;gap:8px}
+.chM{max-width:88%;padding:9px 11px;border-radius:12px;line-height:1.4;word-wrap:break-word}
+.chU{align-self:flex-end;background:#0b5cad;color:#fff;border-bottom-right-radius:4px}
+.chA{align-self:flex-start;background:#fff;border:1px solid #e1e5ea;border-bottom-left-radius:4px}
+.chAc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chAc button{border:1px solid #0b5cad;background:#eef5ff;color:#0b5cad;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:13px}
+.chSug{display:flex;flex-wrap:wrap;gap:6px}.chSug button{border:1px solid #cfd6df;background:#fff;border-radius:14px;padding:6px 10px;cursor:pointer;font-size:13px;color:#333}
+#chFt{border-top:1px solid #e1e5ea;padding:8px;display:flex;gap:6px;align-items:flex-end;background:#fff}
+#chIn{flex:1;resize:none;border:1px solid #cfd6df;border-radius:10px;padding:8px;font:inherit;max-height:120px;min-height:38px}
+#chFt button,#chFt label{border:none;border-radius:10px;padding:9px 11px;cursor:pointer;font-size:15px}
+#chEnv{background:#0b5cad;color:#fff}#chFt label{background:#eef1f5}
+#chPrev{display:flex;flex-wrap:wrap;gap:4px;padding:0 8px;background:#fff}#chPrev img{width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #ddd}#chPrev span{font-size:12px;border:1px solid #ddd;border-radius:8px;padding:3px 7px;align-self:center}
+@media(max-width:560px){#chBox{right:6px;left:6px;width:auto;bottom:80px;height:calc(100vh - 100px)}}
+@media(prefers-color-scheme:dark){#chBox{background:#1d2228;color:#e9edf1}#chMs{background:#15191e}.chA{background:#232a31;border-color:#323b45;color:#e9edf1}#chFt,#chPrev{background:#1d2228;border-color:#323b45}#chIn{background:#15191e;color:#e9edf1;border-color:#323b45}.chSug button{background:#232a31;color:#e9edf1;border-color:#323b45}#chFt label{background:#2b333c;color:#e9edf1}.chAc button{background:#16263a}}`;
+document.head.appendChild(css);
+const fab=document.createElement('button');fab.id='chFab';fab.title='Assistente IA';fab.textContent='💬';
+const box=document.createElement('div');box.id='chBox';
+box.innerHTML='<div id="chHd"><b>🤖 Assistente Porto</b><button id="chLimpa" title="Começar conversa nova">Limpar</button><button id="chX">✕</button></div><div id="chMs"></div><div id="chPrev"></div><div id="chFt"><label title="Anexar orçamento, PDF, print, foto, planilha…">📎<input id="chFile" type="file" multiple style="display:none"></label><textarea id="chIn" rows="1" placeholder="Pergunte ou peça algo…"></textarea><button id="chEnv">➤</button></div>';
+document.body.appendChild(fab);document.body.appendChild(box);
+const $=id=>document.getElementById(id);
+const SUG=['Anexe um orçamento e diga o que mudar — eu altero pra você','O que está parado esperando aprovação?','Quais propostas foram enviadas e não tiveram resposta?','Quanto fica uma fachada ACM de 5 x 1,2 m com instalação?','Escreve um follow-up educado para um cliente que sumiu','Como edito um orçamento já enviado?'];
+function render(){const m=$('chMs');
+  if(!H.length){m.innerHTML='<div class="chM chA">Oi! Sou o assistente da Porto. Posso consultar propostas, pedidos e conversas, calcular preços pela tabela, escrever mensagens para clientes e abrir coisas no app pra você. Pergunte à vontade 🙂</div><div class="chSug">'+SUG.map(s=>'<button>'+es(s)+'</button>').join('')+'</div>';m.querySelectorAll('.chSug button').forEach((b,i)=>b.onclick=()=>{if(i===0){$('chFile').click();return}$('chIn').value=b.textContent;enviar()});return}
+  m.innerHTML=H.map((x,i)=>'<div class="chM '+(x.r==='u'?'chU':'chA')+'">'+(x.r==='u'?es(x.t).replace(/\n/g,'<br>'):md(x.t))+(x.n?'<div style="font-size:12px;opacity:.8;margin-top:4px">📎 '+es(x.n)+'</div>':'')+((x.ac&&x.ac.length)?'<div class="chAc">'+x.ac.map((a,k)=>'<button data-i="'+i+'" data-k="'+k+'">'+es(a.rotulo||rot(a))+'</button>').join('')+'</div>':'')+'</div>').join('')+(ocupado?'<div class="chM chA">⏳ pensando…</div>':'');
+  m.querySelectorAll('.chAc button').forEach(b=>b.onclick=()=>exec(H[+b.dataset.i].ac[+b.dataset.k]));m.scrollTop=m.scrollHeight}
+function rot(a){return ({pdf:'📄 Ver PDF Nº '+a.pk,editar:'📝 Editar Nº '+a.pk,editar_ia:'🤖 Alterar Nº '+a.pk,criar_orcamento:'📄 Montar proposta nova',conversa:'💬 Abrir conversa'+(a.nome?' – '+a.nome:''),enviar:'✅ Enviar Nº '+a.pk,mover:'↪ Mover Nº '+a.pk+' p/ Atendimentos',novo_orcamento:'＋ Novo orçamento',aba:'Ir para '+a.aba,copiar:'📋 Copiar texto'})[a.tipo]||a.tipo}
+async function exec(a){try{const pk=String(a.pk||'').replace(/\D/g,'');const mail=/mail/i.test(a.canal||'');
+  if(a.tipo==='pdf')return pdf(pk);
+  if(a.tipo==='editar'){box.classList.remove('on');return editar(pk)}
+  if(a.tipo==='editar_ia'){if(!a.auto&&!confirm('Pedir à IA para alterar a proposta Nº '+pk+':\n\n"'+a.instrucao+'"\n\nA nova versão vai para Aprovar.'))return;return auto(a)}
+  if(a.tipo==='criar_orcamento'){if(!a.auto&&!confirm('Montar uma proposta nova para '+(a.nome||'o cliente')+'? Ela vai para Aprovar.'))return;return auto(a)}
+  if(a.tipo==='conversa'){box.classList.remove('on');return conv(a.cli,a.nome||'')}
+  if(a.tipo==='enviar'){if(!confirm('Enviar a proposta Nº '+pk+' para o cliente por '+(mail?'e-mail':'WhatsApp')+'?'))return;return acao({a:mail?'eok':'ok',pk},'✅ Proposta '+pk+' enviada ao cliente')}
+  if(a.tipo==='mover'){if(!confirm('Tirar a proposta Nº '+pk+' de Aprovar (sem enviar) e mandar para Atendimentos?'))return;return acao({a:mail?'emover':'mover',pk},'↪ Proposta '+pk+' movida para Atendimentos')}
+  if(a.tipo==='novo_orcamento'){box.classList.remove('on');const k='n'+(++NVi);NV[k]={n:a.nome||'',f:String(a.fone||'').replace(/\D/g,''),t:a.texto||''};return novoDe(k)}
+  if(a.tipo==='aba'){box.classList.remove('on');return setTab(({orc:'novo',orcamento:'novo',atendimentos:'atend'})[a.aba]||a.aba)}
+  if(a.tipo==='copiar'){try{await navigator.clipboard.writeText(a.texto||'');toast('📋 Texto copiado')}catch(e){prompt('Copie o texto:',a.texto||'')}return}
+  }catch(e){toast('Não consegui: '+e.message)}}
+async function auto(a){const pk=String(a.pk||'').replace(/\D/g,'');const msg={r:'a',t:'',ac:[]};
+  try{if(a.tipo==='editar_ia'){H.push({r:'a',t:'⏳ Alterando a proposta Nº '+pk+'… (leva uns segundos)'});render();const j=await edApi(Object.assign({pk,instrucao:a.instrucao||''},ULT&&ULT.imgs.length?{imgs:ULT.imgs.slice(0,12),imgLeg:ULT.imgs.slice(0,12).map(u=>ULT.legs[u.length+':'+u.slice(-48)]||'')}:{}));H.pop();msg.t='✅ **Proposta Nº '+pk+' alterada** — novo total **'+j.total+'**. A nova versão está em **Aprovar** (nada foi enviado ao cliente).';msg.ac=[{tipo:'pdf',pk},{tipo:'editar',pk,rotulo:'📝 Conferir/ajustar'},{tipo:'aba',aba:'aprovar',rotulo:'Ir para Aprovar'}]}
+    else{const x=ULT||vazio();const im=x.imgs.slice(0,12);const tx=(a.texto||'')+(x.txts.length?'\n\n'+x.txts.map(t=>'[ARQUIVO ANEXADO: '+t.nome+']\n'+t.texto).join('\n\n'):'');
+      const r=await fetch(API+'?k='+encodeURIComponent(K),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({a:'novo',texto:tx.slice(0,30000),nome:a.nome||'',fone:String(a.fone||'').replace(/\D/g,''),email:a.email||'',imgs:im,imgLeg:im.map(u=>x.legs[u.length+':'+u.slice(-48)]||''),docs:x.docs.slice(0,3)})});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw new Error(j.erro||('falha '+r.status));
+      msg.t='📄 **Montando a proposta nova** com as alterações — ela aparece em **Aprovar** em cerca de 1 minuto (nada vai para o cliente sem você aprovar).';msg.ac=[{tipo:'aba',aba:'aprovar',rotulo:'Ir para Aprovar'}]}
+  ULT=null}
+  catch(e){if(H.length&&/^⏳/.test(H[H.length-1].t))H.pop();msg.t='⚠️ Não consegui alterar: '+e.message}
+  H.push(msg);salvar();render();setTimeout(()=>{try{carregar()}catch(e){}},1500)}
+async function enviar(){const t=$('chIn').value.trim();const nA=ANX.imgs.length+ANX.docs.length+ANX.txts.length;if((!t&&!nA)||ocupado)return;
+  if(typeof K==='undefined'||!K){toast('Entre no app primeiro.');return}
+  const nomes=[...new Set([...ANX.docs.map(d=>d.nome),...ANX.txts.map(x=>x.nome)])].concat(ANX.imgs.length?[ANX.imgs.length+' imagem(ns)']:[]).join(', ');H.push({r:'u',t:t||'(veja o anexo)',n:nA?nomes:undefined});const X=ANX;if(nA)ULT=X;ANX=vazio();$('chPrev').innerHTML='';$('chIn').value='';ocupado=true;render();salvar();
+  try{const r=await fetch(API+'?k='+encodeURIComponent(K),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({a:'chat',tela:(typeof TAB!=='undefined'?TAB:''),msgs:H.slice(-14).map(x=>({r:x.r,t:x.t+(x.n?'\n[anexos: '+x.n+']':'')})),imgs:X.imgs.slice(0,8),docs:X.docs.slice(0,3),textos:X.txts.map(t=>'[ARQUIVO: '+t.nome+']\n'+t.texto).join('\n\n').slice(0,40000)})});const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok)throw new Error(j.erro||('falha '+r.status));const ac=j.acoes||[];H.push({r:'a',t:j.resposta,ac:ac.filter(a=>!a.auto)});ocupado=false;salvar();render();for(const a of ac.filter(a=>a.auto&&(a.tipo==='editar_ia'||a.tipo==='criar_orcamento')))await auto(a);return}
+  catch(e){H.push({r:'a',t:'⚠️ '+e.message})}
+  ocupado=false;salvar();render()}
+function prev(){$('chPrev').innerHTML=ANX.imgs.slice(0,8).map(u=>'<img src="'+u+'">').join('')+ANX.docs.map(d=>'<span>📄 '+es(d.nome)+'</span>').join('')+ANX.txts.map(t=>'<span>📝 '+es(t.nome)+'</span>').join('')+((ANX.imgs.length+ANX.docs.length+ANX.txts.length)?'<span style="cursor:pointer" id="chTira">✕ tirar</span>':'');const x=$('chTira');if(x)x.onclick=()=>{ANX=vazio();prev()}}
+async function anexar(inp){const bak=[IMGS.slice(),DOCS.slice(),TXTS.slice()];IMGS.length=0;DOCS.length=0;TXTS.length=0;
+  try{await addImgs(inp);IMGS.forEach(u=>{ANX.imgs.push(u);ANX.legs[u.length+':'+u.slice(-48)]=(window.__LEG||{})[u.length+':'+u.slice(-48)]||''});DOCS.forEach(d=>ANX.docs.push(d));TXTS.forEach(t=>ANX.txts.push(t))}catch(e){toast('Erro ao anexar: '+e.message)}
+  finally{IMGS.length=0;DOCS.length=0;TXTS.length=0;bak[0].forEach(x=>IMGS.push(x));bak[1].forEach(x=>DOCS.push(x));bak[2].forEach(x=>TXTS.push(x));try{verImgs()}catch(e){}prev();$('chIn').focus()}}
+fab.onclick=()=>{box.classList.toggle('on');if(box.classList.contains('on')){render();setTimeout(()=>$('chIn').focus(),50)}};
+$('chX').onclick=()=>box.classList.remove('on');
+$('chLimpa').onclick=()=>{if(H.length&&!confirm('Apagar esta conversa com o assistente?'))return;H=[];salvar();render()};
+$('chEnv').onclick=enviar;$('chFile').onchange=e=>anexar(e.target);
+$('chIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar()}});
+$('chIn').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(120,e.target.scrollHeight)+'px'});
+})();
+</script>
 </body></html>

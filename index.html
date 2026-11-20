@@ -136,6 +136,26 @@ body.tela-login .login h3{color:var(--az2)}
 #chBal:hover{transform:scale(1.04) rotate(-1deg)}
 @media(max-width:760px){#chBal{display:none}}
 </style>
+<style id="mascote-cenas">
+.masc svg.mcena{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.masc .cLap,.masc .cAno{opacity:0;transition:opacity .35s}
+.masc.digita .cLap,.masc.anota .cAno{opacity:1}
+.masc.digita .mw,.masc.anota .mw{animation:none!important;opacity:0!important}
+.masc.digita{animation:mBob .9s ease-in-out infinite}
+.masc .cMao1,.masc .cMao2{transform-box:fill-box;transform-origin:center}
+.masc.digita .cMao1{animation:cTecla .32s ease-in-out infinite}
+.masc.digita .cMao2{animation:cTecla .32s .16s ease-in-out infinite}
+@keyframes cTecla{0%,100%{transform:translateY(0)}50%{transform:translateY(10px)}}
+.masc .cCod rect{opacity:0}
+.masc.digita .cCod rect{animation:cCod 1.4s infinite}
+.masc.digita .cCod rect:nth-child(2){animation-delay:.3s}.masc.digita .cCod rect:nth-child(3){animation-delay:.6s}
+@keyframes cCod{0%{opacity:0;transform:translate(0,10px)}30%{opacity:1}100%{opacity:0;transform:translate(10px,-26px)}}
+.masc .cAno path[class^=cL]{stroke-dasharray:60;stroke-dashoffset:60}
+.masc.anota .cL1{animation:cLinha 4.8s .2s linear infinite}.masc.anota .cL2{animation:cLinha 4.8s 1.2s linear infinite}.masc.anota .cL3{animation:cLinha 4.8s 2.2s linear infinite}.masc.anota .cL4{animation:cLinha 4.8s 3.2s linear infinite}
+@keyframes cLinha{0%{stroke-dashoffset:60}18%,100%{stroke-dashoffset:0}}
+.masc.anota .cLapis{animation:cLapis 1s ease-in-out infinite}
+@keyframes cLapis{0%{transform:translate(184px,146px) rotate(15deg)}25%{transform:translate(200px,140px) rotate(25deg)}50%{transform:translate(216px,146px) rotate(15deg)}75%{transform:translate(200px,150px) rotate(5deg)}100%{transform:translate(184px,146px) rotate(15deg)}}
+</style>
 </head><body>
 <header><div class="logo"></div><h1>PORTO COMUNICAÇÃO<small>Atendimento · propostas · pedidos</small></h1><div class="sp"></div><button class="btn gh" onclick="carregar()">↻</button></header>
 <nav id="nav"></nav>
@@ -583,6 +603,23 @@ function mostra(){const f=document.getElementById('chFab');if(aberto()||!f||getC
 b.onclick=()=>{b.classList.remove('on');const f=document.getElementById('chFab');if(f)f.click()};
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#chFab'))b.classList.remove('on')},true);
 setTimeout(mostra,2500);setInterval(mostra,10000);
+})();
+</script>
+<script>
+/* ===== Mascote: cenas (digitando / anotando) ===== */
+(function(){
+const C="<svg class=\"mcena\" viewBox=\"0 0 256 256\"><g class=\"cLap\"><path d=\"M52 236 L206 236 L222 252 L36 252 Z\" fill=\"#9aa3ad\" stroke=\"#5d6670\" stroke-width=\"2\"/><rect x=\"66\" y=\"160\" width=\"124\" height=\"78\" rx=\"8\" fill=\"#c9d0d8\" stroke=\"#5d6670\" stroke-width=\"3\"/><circle cx=\"128\" cy=\"199\" r=\"9\" fill=\"#e6007e\"/><circle cx=\"128\" cy=\"199\" r=\"4\" fill=\"#fff\"/><circle class=\"cMao1\" cx=\"92\" cy=\"160\" r=\"11\" fill=\"url(#mgY)\"/><circle class=\"cMao2\" cx=\"164\" cy=\"160\" r=\"11\" fill=\"url(#mgY)\"/><g class=\"cCod\"><rect x=\"196\" y=\"120\" width=\"34\" height=\"6\" rx=\"3\" fill=\"#00aeef\"/><rect x=\"200\" y=\"132\" width=\"24\" height=\"6\" rx=\"3\" fill=\"#e6007e\"/><rect x=\"196\" y=\"144\" width=\"30\" height=\"6\" rx=\"3\" fill=\"#ffd200\"/></g></g><g class=\"cAno\"><g transform=\"rotate(-10 205 175)\"><rect x=\"168\" y=\"120\" width=\"72\" height=\"96\" rx=\"6\" fill=\"#fff\" stroke=\"#3b3b3f\" stroke-width=\"3\"/><rect x=\"190\" y=\"112\" width=\"28\" height=\"12\" rx=\"3\" fill=\"#3b3b3f\"/><path class=\"cL1\" d=\"M178 142 H230\" stroke=\"#0b4ea2\" stroke-width=\"4\" stroke-linecap=\"round\"/><path class=\"cL2\" d=\"M178 158 H222\" stroke=\"#0b4ea2\" stroke-width=\"4\" stroke-linecap=\"round\"/><path class=\"cL3\" d=\"M178 174 H228\" stroke=\"#0b4ea2\" stroke-width=\"4\" stroke-linecap=\"round\"/><path class=\"cL4\" d=\"M178 190 H214\" stroke=\"#e6007e\" stroke-width=\"4\" stroke-linecap=\"round\"/></g><g class=\"cLapis\"><path d=\"M0 0 L8 -34 L18 -32 L10 2 Z\" fill=\"#ffd200\" stroke=\"#7a5b00\" stroke-width=\"2\"/><path d=\"M0 0 L10 2 L3 10 Z\" fill=\"#f3c9a0\"/><circle cx=\"13\" cy=\"-30\" r=\"10\" fill=\"url(#mgY)\"/></g></g></svg>";
+let n=0,balOn=false;
+function poe(){document.querySelectorAll('.masc').forEach(m=>{if(!m.querySelector('.mcena'))m.insertAdjacentHTML('beforeend',C)})}
+function cena(m,c){if(!m)return;m.classList.remove('digita','anota');if(c)m.classList.add(c)}
+setInterval(()=>{try{poe();
+ const b=document.getElementById('chBal'),on=!!(b&&b.classList.contains('on'));
+ const f=document.querySelector('#chFab .masc');
+ if(on)cena(f,'');else if(balOn||(f&&!f.classList.contains('digita')&&!f.classList.contains('anota')&&n===0)){cena(f,(n++%2)?'anota':'digita')}
+ balOn=on;
+ const av=document.querySelector('#chHd .masc');if(av)cena(av,av.classList.contains('pensa')?'digita':'');
+ const w=document.querySelector('#chMs .chMasc .masc');if(w&&!w.classList.contains('acena')){const s=Math.floor(Date.now()/6000)%3;cena(w,['','digita','anota'][s])}
+}catch(e){}},500);
 })();
 </script>
 </body></html>

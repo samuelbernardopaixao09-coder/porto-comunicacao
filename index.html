@@ -579,10 +579,10 @@ const FR=['O que precisar, estou aqui!','Precisa de ajuda com um orçamento?','P
 const b=document.createElement('div');b.id='chBal';b.title='Falar com o Assistente';b.innerHTML="<svg viewBox=\"0 0 240 150\" aria-hidden=\"true\"><defs><pattern id=\"balDots\" width=\"7\" height=\"7\" patternUnits=\"userSpaceOnUse\"><circle cx=\"3.5\" cy=\"3.5\" r=\"1.6\" fill=\"#111\"/></pattern></defs><ellipse cx=\"129\" cy=\"72\" rx=\"101\" ry=\"53\" fill=\"url(#balDots)\"/><path d=\"M168 112 L214 146 L186 106 Z\" fill=\"url(#balDots)\"/><path d=\"M157 104 L203 140 L176 98\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"5\" stroke-linejoin=\"round\"/><ellipse cx=\"118\" cy=\"62\" rx=\"102\" ry=\"54\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"5\"/><path d=\"M159 100 L200 134 L174 96 Z\" fill=\"#fff\"/><path d=\"M14 40 Q22 22 40 12\" fill=\"none\" stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M26 46 Q32 34 44 26\" fill=\"none\" stroke=\"#111\" stroke-width=\"3.5\" stroke-linecap=\"round\"/><path d=\"M206 20 Q222 30 228 46\" fill=\"none\" stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>"+'<span></span>';document.body.appendChild(b);
 let i=0,t=null;
 const aberto=()=>{const x=document.getElementById('chBox');return x&&x.classList.contains('on')};
-function mostra(){const f=document.getElementById('chFab');if(aberto()||!f||getComputedStyle(f).display==='none'||document.querySelector('.login'))return;b.querySelector('span').textContent=FR[i%FR.length];i++;b.classList.add('on');const m=f.querySelector('.masc');if(m){m.classList.add('acena');setTimeout(()=>m.classList.remove('acena'),2600)}clearTimeout(t);t=setTimeout(()=>b.classList.remove('on'),6500)}
+function mostra(){const f=document.getElementById('chFab');if(aberto()||!f||getComputedStyle(f).display==='none'||document.querySelector('.login'))return;b.querySelector('span').textContent=FR[i%FR.length];i++;b.classList.add('on');const m=f.querySelector('.masc');if(m){m.classList.add('acena');setTimeout(()=>m.classList.remove('acena'),2600)}clearTimeout(t);t=setTimeout(()=>b.classList.remove('on'),5000)}
 b.onclick=()=>{b.classList.remove('on');const f=document.getElementById('chFab');if(f)f.click()};
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#chFab'))b.classList.remove('on')},true);
-setTimeout(mostra,2500);setInterval(mostra,45000);
+setTimeout(mostra,2500);setInterval(mostra,10000);
 })();
 </script>
 </body></html>

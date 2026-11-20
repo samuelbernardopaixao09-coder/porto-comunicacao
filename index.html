@@ -623,4 +623,98 @@ setInterval(()=>{try{poe();
 }catch(e){}},500);
 })();
 </script>
+<style id="tabela-precos">
+#dlgPr{position:fixed;inset:0;z-index:9999;background:rgba(6,20,45,.55);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+#dlgPr.on{display:flex}
+#dlgPr .pw{background:#fff;border-radius:18px;width:100%;max-width:1100px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;font:14px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+#dlgPr .ph{background:var(--az,#0b4ea2);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px;position:relative}
+#dlgPr .ph::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,#00aeef 0 25%,#e6007e 25% 50%,#ffd200 50% 75%,#111827 75%)}
+#dlgPr .ph h3{margin:0;font-size:17px;flex:1}#dlgPr .ph small{display:block;font-weight:500;color:#c9d8f2;font-size:12px;margin-top:2px}
+#dlgPr .ph button{border:0;background:rgba(255,255,255,.16);color:#fff;width:36px;height:36px;border-radius:10px;font-size:18px;cursor:pointer}
+#dlgPr .pb{padding:20px}
+#dlgPr .tb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+#dlgPr .tb input{flex:1;min-width:180px;padding:10px 12px;border:1px solid #d6deea;border-radius:10px;font-size:14px}
+#dlgPr .bt{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:13.5px;background:#eef2f8;color:#083b7c}
+#dlgPr .bt.pri{background:var(--pri,#e6007e);color:#fff}#dlgPr .bt:disabled{opacity:.5;cursor:default}
+#dlgPr .sim{background:#f4f7fc;border-radius:14px;padding:14px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#dlgPr .sim b{color:#083b7c;margin-right:4px}
+#dlgPr .sim select,#dlgPr .sim input{padding:8px 10px;border:1px solid #d6deea;border-radius:9px;font-size:13.5px;background:#fff}
+#dlgPr .sim select{flex:1;min-width:220px}#dlgPr .sim input{width:84px}
+#dlgPr .sim .res{flex-basis:100%;font-size:13.5px;color:#111;margin-top:4px}
+#dlgPr .sim .res strong{color:var(--pri,#e6007e);font-size:16px}
+#dlgPr table{width:100%;border-collapse:separate;border-spacing:0 6px}
+#dlgPr th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:#6b7a90;padding:0 6px}
+#dlgPr td{padding:4px 4px;vertical-align:top;background:#fbfcfe}
+#dlgPr tr td:first-child{border-radius:10px 0 0 10px}#dlgPr tr td:last-child{border-radius:0 10px 10px 0}
+#dlgPr td input,#dlgPr td select,#dlgPr td textarea{width:100%;box-sizing:border-box;padding:7px 8px;border:1px solid #e1e7f0;border-radius:8px;font-size:13px;font-family:inherit;background:#fff}
+#dlgPr td textarea{resize:vertical;min-height:34px;height:34px}
+#dlgPr td.c-id input{font-weight:700;color:#083b7c;text-transform:uppercase}
+#dlgPr td.c-pr input,#dlgPr td.c-mn input{text-align:right}
+#dlgPr tr.off td{opacity:.45}#dlgPr tr.mud td{background:#fff7e0}
+#dlgPr .x{border:0;background:none;cursor:pointer;font-size:16px;padding:6px;color:#b42318}
+#dlgPr .nota{font-size:12.5px;color:#5b6b82;margin:6px 0 0}
+@media(max-width:760px){
+ #dlgPr{padding:0}#dlgPr .pw{border-radius:0;min-height:100%}
+ #dlgPr thead{display:none}#dlgPr table,#dlgPr tbody,#dlgPr tr,#dlgPr td{display:block;width:100%}
+ #dlgPr tr{background:#fbfcfe;border-radius:12px;padding:8px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+ #dlgPr td{background:none!important;padding:0}#dlgPr td.c-nm,#dlgPr td.c-ob{grid-column:1/-1}
+ #dlgPr td::before{content:attr(data-l);display:block;font-size:10.5px;color:#6b7a90;text-transform:uppercase;margin:0 0 2px 2px}
+}
+</style>
+<script>
+/* ===== Tabela de preços (banco de dados editável) ===== */
+(function(){
+let TAB=null,ORIG='',HIST=0;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const brl=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=v=>{v=String(v==null?'':v).trim();if(/,/.test(v))v=v.replace(/\./g,'').replace(',','.');return Number(v)||0};
+const fmt=v=>v?String(v).replace('.',','):'';
+function dlg(){let d=document.getElementById('dlgPr');if(d)return d;d=document.createElement('div');d.id='dlgPr';
+ d.innerHTML='<div class="pw"><div class="ph"><h3>📋 Tabela de preços<small id="prInfo">carregando…</small></h3><button onclick="fecharPrecos()" aria-label="Fechar">✕</button></div><div class="pb">'
+ +'<div class="sim"><b>🧮 Simular:</b><select id="prSp"></select><input id="prSl" placeholder="Larg. (m)" inputmode="decimal"><input id="prSa" placeholder="Alt. (m)" inputmode="decimal"><input id="prSq" placeholder="Qtd" value="1" inputmode="numeric"><div class="res" id="prSr">Escolha um produto para ver o valor que vai no orçamento.</div></div>'
+ +'<div class="tb"><input id="prBu" placeholder="🔎 Buscar produto ou código…"><button class="bt" onclick="prNovo()">＋ Produto</button><button class="bt" id="prDz" onclick="prDesfazer()">↶ Desfazer última</button><button class="bt pri" id="prSv" onclick="prSalvar()">Salvar tabela</button></div>'
+ +'<table><thead><tr><th style="width:150px">Código</th><th>Produto (como a IA lê)</th><th style="width:86px">Cobrança</th><th style="width:110px">Preço (R$)</th><th style="width:110px">Mínimo/peça</th><th style="width:22%">Regra para a IA</th><th style="width:46px">Ativo</th><th style="width:34px"></th></tr></thead><tbody id="prTb"></tbody></table>'
+ +'<p class="nota">A IA só escolhe o <b>código</b> e as medidas; o sistema calcula o valor com esta tabela. Peças com menos de 1 m² são cobradas como 1 m². O "mínimo/peça" é o valor mínimo de cada peça (ex.: letreiro LED). Mudanças valem para os próximos orçamentos.</p></div></div>';
+ document.body.appendChild(d);d.addEventListener('click',e=>{if(e.target===d)fecharPrecos()});
+ d.querySelector('#prBu').oninput=filtra;['prSp','prSl','prSa','prSq'].forEach(i=>d.querySelector('#'+i).oninput=simula);
+ d.querySelector('#prTb').addEventListener('input',e=>{const tr=e.target.closest('tr');if(tr){ler();tr.classList.toggle('off',!tr.querySelector('[data-k=ativo]').checked);marca();opcoes();simula()}});
+ return d}
+function linha(e,i){return '<tr data-i="'+i+'" class="'+(e.ativo===false?'off':'')+'">'
+ +'<td class="c-id" data-l="Código"><input data-k="id" value="'+esc(e.id)+'"></td>'
+ +'<td class="c-nm" data-l="Produto"><input data-k="nome" value="'+esc(e.nome)+'"></td>'
+ +'<td data-l="Cobrança"><select data-k="un"><option value="m2"'+(e.un==='m2'?' selected':'')+'>por m²</option><option value="un"'+(e.un!=='m2'?' selected':'')+'>por unid.</option></select></td>'
+ +'<td class="c-pr" data-l="Preço (R$)"><input data-k="preco" inputmode="decimal" value="'+esc(fmt(e.preco))+'"></td>'
+ +'<td class="c-mn" data-l="Mínimo/peça"><input data-k="min" inputmode="decimal" placeholder="—" value="'+esc(fmt(e.min))+'"></td>'
+ +'<td class="c-ob" data-l="Regra para a IA"><textarea data-k="obs" placeholder="opcional">'+esc(e.obs||'')+'</textarea></td>'
+ +'<td data-l="Ativo"><input type="checkbox" data-k="ativo"'+(e.ativo===false?'':' checked')+' style="width:20px;height:20px;margin-top:6px"></td>'
+ +'<td><button class="x" title="Remover" onclick="prDel('+i+')">🗑</button></td></tr>'}
+function desenha(){const tb=document.getElementById('prTb');tb.innerHTML=TAB.itens.map(linha).join('');filtra();opcoes();marca()}
+function ler(){document.querySelectorAll('#prTb tr').forEach(tr=>{const e=TAB.itens[+tr.dataset.i];if(!e)return;tr.querySelectorAll('[data-k]').forEach(f=>{const k=f.dataset.k;if(k==='ativo')e.ativo=f.checked?undefined:false;else if(k==='preco'||k==='min')e[k]=num(f.value);else e[k]=k==='id'?f.value.toUpperCase().trim():f.value})})}
+function marca(){const mud=JSON.stringify(TAB.itens)!==ORIG;const b=document.getElementById('prSv');b.disabled=!mud;b.textContent=mud?'Salvar alterações':'Salvo ✓';document.getElementById('prDz').disabled=!HIST}
+function filtra(){const q=(document.getElementById('prBu').value||'').toLowerCase();document.querySelectorAll('#prTb tr').forEach(tr=>{const e=TAB.itens[+tr.dataset.i]||{};tr.style.display=!q||(e.id+' '+e.nome).toLowerCase().includes(q)?'':'none'})}
+function opcoes(){const s=document.getElementById('prSp'),v=s.value;s.innerHTML='<option value="">— produto —</option>'+TAB.itens.filter(e=>e.id&&e.ativo!==false).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.id+' · '+e.nome)+'</option>').join('');s.value=v}
+function simula(){const r=document.getElementById('prSr');const e=TAB.itens.find(x=>x.id===document.getElementById('prSp').value);if(!e){r.innerHTML='Escolha um produto para ver o valor que vai no orçamento.';return}
+ const q=Math.max(1,Math.round(num(document.getElementById('prSq').value)||1));let p=num(e.preco),mn=num(e.min);
+ if(e.un==='m2'){let L=num(document.getElementById('prSl').value),A=num(document.getElementById('prSa').value);if(!(L>0&&A>0)){r.innerHTML='Informe largura e altura em metros.';return}
+  if(Math.max(L,A)>30){if(L>3)L/=100;if(A>3)A/=100}const ar=L*A,cob=Math.max(ar,1);if(mn>0&&p*cob<mn)p=Math.ceil(mn/cob*100)/100;const pc=Math.round(cob*p*100)/100;
+  r.innerHTML=fmt(L)+' × '+fmt(A)+' m = '+ar.toFixed(2).replace('.',',')+' m²'+(ar<1?' (cobra 1 m²)':'')+' × '+brl(p)+'/m²'+(p!==num(e.preco)?' <i>(ajustado ao mínimo de '+brl(mn)+')</i>':'')+' = '+brl(pc)+' por peça'+(q>1?' × '+q:'')+' → <strong>'+brl(pc*q)+'</strong>'}
+ else{if(mn>0&&p<mn)p=mn;r.innerHTML=q+' × '+brl(p)+' → <strong>'+brl(p*q)+'</strong>'}}
+async function carregar(modo,extra){const r=await edApi(Object.assign({a:'precos',modo:modo||'ler'},extra||{}));TAB={itens:r.tab.itens.map(e=>({id:e.id,nome:e.nome,un:e.un==='m2'?'m2':'un',preco:Number(e.preco)||0,min:Number(e.min)||0,obs:e.obs||'',ativo:e.ativo===false?false:undefined,inst:e.inst||undefined}))};HIST=r.hist||0;ORIG=JSON.stringify(TAB.itens);
+ document.getElementById('prInfo').textContent=TAB.itens.length+' produtos · '+(r.tab.v?'versão '+r.tab.v+(r.tab.t?' · alterada em '+new Date(r.tab.t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'')+(r.tab.u?' por '+r.tab.u:''):'tabela original');desenha();simula()}
+window.abrirPrecos=async function(){const d=dlg();d.classList.add('on');document.body.style.overflow='hidden';try{await carregar()}catch(e){document.getElementById('prInfo').textContent='Erro: '+e.message}};
+window.fecharPrecos=function(){if(TAB&&JSON.stringify(TAB.itens)!==ORIG&&!confirm('Sair sem salvar as alterações?'))return;document.getElementById('dlgPr').classList.remove('on');document.body.style.overflow=''};
+window.prNovo=function(){ler();TAB.itens.unshift({id:'',nome:'',un:'m2',preco:0});document.getElementById('prBu').value='';desenha();const i=document.querySelector('#prTb tr [data-k=id]');if(i)i.focus()};
+window.prDel=function(i){ler();const e=TAB.itens[i];if(!confirm('Remover "'+(e.nome||e.id||'linha')+'" da tabela?'))return;TAB.itens.splice(i,1);desenha()};
+window.prSalvar=async function(){ler();const ruins=TAB.itens.filter(e=>(e.id||e.nome)&&(!e.id||!e.nome||!(num(e.preco)>0)));if(ruins.length){alert('Preencha código, produto e preço de: '+ruins.map(e=>e.id||e.nome).join(', '));return}
+ const ids=TAB.itens.map(e=>e.id).filter(Boolean);const dup=ids.filter((x,i)=>ids.indexOf(x)!==i);if(dup.length){alert('Código repetido: '+[...new Set(dup)].join(', '));return}
+ const b=document.getElementById('prSv');b.disabled=true;b.textContent='Salvando…';try{await carregar('salvar',{itens:TAB.itens.filter(e=>e.id&&e.nome)});toast&&toast('Tabela de preços salva')}catch(e){alert('Não salvou: '+e.message);marca()}};
+window.prDesfazer=async function(){if(!confirm('Voltar a tabela para a versão anterior?'))return;try{await carregar('desfazer');toast&&toast('Tabela voltou para a versão anterior')}catch(e){alert(e.message)}};
+// botão no menu de cima e no menu lateral
+const IC='<svg viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>';
+function botoes(){const nav=document.getElementById('nav');if(nav&&nav.children.length&&!nav.querySelector('.btPr')){const seps=nav.querySelectorAll(':scope > .sep');const b=document.createElement('button');b.className='btPr';b.textContent='🏷️ Preços';b.onclick=()=>abrirPrecos();if(seps.length>1)nav.insertBefore(b,seps[seps.length-1]);else nav.appendChild(b)}
+ const rl=document.getElementById('rail');if(rl&&rl.children.length&&!rl.querySelector('.rbPr')){const s=rl.querySelectorAll('.sepr');const b=document.createElement('button');b.className='rb rbPr';b.setAttribute('aria-label','Tabela de preços');b.innerHTML=IC+'<span class="lb">Tabela de preços</span>';b.onclick=()=>abrirPrecos();if(s.length>1)rl.insertBefore(b,s[1]);else rl.appendChild(b)}}
+const r2=window.render;if(typeof r2==='function'){window.render=function(){const x=r2.apply(this,arguments);try{botoes()}catch(e){}return x}}
+setInterval(()=>{try{if(!document.querySelector('.login'))botoes()}catch(e){}},1500);
+})();
+</script>
 </body></html>

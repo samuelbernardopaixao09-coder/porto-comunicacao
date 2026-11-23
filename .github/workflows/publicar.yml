@@ -47,11 +47,8 @@ jobs:
           cp index.html sw.js manifest.json icon-192.png icon-512.png site/
           if [ -f custos.html ]; then cp custos.html site/; fi
           if [ -f gestao.html ]; then cp gestao.html site/; fi
-          if [ -f logo.svg ]; then
-            sudo apt-get install -y -qq librsvg2-bin >/dev/null
-            rsvg-convert -w 512 -h 512 logo.svg -o site/icon-512.png
-            rsvg-convert -w 192 -h 192 logo.svg -o site/icon-192.png
-          fi
+          # ícones e manifesto de cada app (Comercial e Gestão)
+          for f in gestao-192.png gestao-512.png gestao.webmanifest logo.svg; do if [ -f "$f" ]; then cp "$f" site/; fi; done
           ls -la site
       - uses: actions/upload-pages-artifact@v3
         with:

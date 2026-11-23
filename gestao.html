@@ -603,5 +603,16 @@ render();carrega(true);
 })();
 </script>
 
+<script id="instalar-gestao">
+/* Botão para instalar o Porto Gestão como app separado (ícone próprio na barra de tarefas) */
+(function(){let ev=null;const emApp=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+function bt(){let b=document.getElementById('btInstG');if(b)return b;b=document.createElement('button');b.id='btInstG';b.type='button';b.textContent='⬇ Instalar o Gestão no computador';b.style.cssText='position:fixed;left:16px;bottom:16px;z-index:9998;border:0;border-radius:12px;padding:12px 16px;font:700 14px Inter,system-ui,sans-serif;background:#FACC15;color:#111827;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer';
+ b.onclick=async()=>{if(ev){ev.prompt();const r=await ev.userChoice;ev=null;if(r&&r.outcome==='accepted')b.remove()}else{alert('Para instalar o Porto Gestão como um app separado:\n\n1. Abra este endereço numa aba normal do Chrome (não dentro do app Comercial):\n'+location.origin+location.pathname+'\n\n2. Clique no menu ⋮ do Chrome → Transmitir, salvar e compartilhar → Instalar Porto Gestão.\n\n3. Com o app aberto, clique com o botão direito no ícone dele na barra de tarefas → Fixar na barra de tarefas.')}};document.body.appendChild(b);return b}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;bt()});
+addEventListener('appinstalled',()=>{const b=document.getElementById('btInstG');if(b)b.remove()});
+/* aberto dentro de outro app (o Comercial) ou numa aba: mostra o botão de ajuda */
+setTimeout(()=>{const meu=document.querySelector('link[rel=manifest]');if(!ev&&!(emApp&&document.referrer==='')&&!sessionStorage.getItem('gInst'))bt()},4000);
+})();
+</script>
 </body>
 </html>

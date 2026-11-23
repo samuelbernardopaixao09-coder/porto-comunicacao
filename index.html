@@ -717,4 +717,18 @@ const r2=window.render;if(typeof r2==='function'){window.render=function(){const
 setInterval(()=>{try{if(!document.querySelector('.login'))botoes()}catch(e){}},1500);
 })();
 </script>
+<script>
+/* ===== Busca de orçamentos também no arquivo (todos os já feitos) ===== */
+(function(){
+if(typeof buscaOrc!=='function')return;
+const b0=buscaOrc;let ULTQ='',RES=[],T=null;
+function extra(){if(RES===null)return '<div class="mut" style="margin:10px 2px">🔎 Procurando nos orçamentos antigos…</div>';
+ const loc=new Set(todosOrc().map(p=>String(p.pk)));const x=(RES||[]).filter(p=>!loc.has(String(p.pk)));if(!x.length)return '';
+ return '<div class="mut" style="margin:16px 2px 8px;font-weight:700">📦 Orçamentos antigos ('+x.length+')</div>'+x.map(p=>{try{return cardOrc(p)}catch(e){return '<div class="card">Nº '+esc(p.pk)+' · '+esc(p.nome||p.cli)+' · '+esc(p.total||'')+'</div>'}}).join('')}
+function ajusta(){const el=document.getElementById('bArq');if(!el)return;el.innerHTML=extra();const vazio=el.parentElement&&el.parentElement.querySelector(':scope > .card.empty');if(vazio)vazio.style.display=el.querySelector('.card')?'none':''}
+window.buscaOrc=function(){const h=b0();const q=String(typeof BQ!=='undefined'?BQ:'').trim();if(!q)return h;
+ if(q!==ULTQ){ULTQ=q;RES=null;clearTimeout(T);T=setTimeout(async()=>{let r=[];try{r=(await edApi({a:'buscaorc',q})).r||[]}catch(e){}if(q!==ULTQ)return;RES=r;ajusta()},400)}
+ setTimeout(ajusta,0);return h+'<div id="bArq">'+extra()+'</div>'};
+})();
+</script>
 </body></html>

@@ -784,7 +784,15 @@ async function usa(){if(!RES)return;const d=dlg();const b=d.querySelector('#imgS
   await edApi({pk:PK,modo:'salvar',orc:ORC,nome:NOME,fone:FONE,email:'',imgs:[j]});st('Pronto! A proposta Nº '+PK+' foi atualizada com a imagem nova.');toast&&toast('Imagem da proposta atualizada');setTimeout(()=>{fecha();try{carregar()}catch(e){}},1200)}
  catch(e){st('Não salvou: '+e.message,1)}b.disabled=false}
 function botoes(){document.querySelectorAll('button[onclick^="editar(\'"]').forEach(b=>{if(b.nextElementSibling&&b.nextElementSibling.classList.contains('btImgIA'))return;const m=String(b.getAttribute('onclick')).match(/editar\('(\d+)'\)/);if(!m)return;const n=document.createElement('button');n.className='btn mid btImgIA';n.textContent='🎨 Imagem com IA';n.onclick=()=>editarImgIA(m[1]);b.after(n)})}
-setInterval(()=>{try{botoes()}catch(e){}},1200);
+/* "Pedir à IA" também edita a imagem quando o pedido fala de imagem/foto */
+function toJpeg(src){return new Promise((ok,er)=>{const i=new Image();i.onload=()=>{let w=i.width,h=i.height,M=1600;if(w>M||h>M){const s=M/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(i,0,0,w,h);ok(c.toDataURL('image/jpeg',0.86))};i.onerror=er;i.src=src})}
+const __s0=window.edSalvar;if(typeof __s0==='function'){window.edSalvar=async function(ia){const instr=((document.getElementById('edInstr')||{}).value||'').trim();
+ if(ia&&instr&&/imagem|imagens|foto|figura|simula|desenh|mockup|montagem|ilustra/i.test(instr)&&typeof ED!=='undefined'&&ED&&ED.pk){const bI=document.getElementById('edIABtn');const old=bI?bI.textContent:'';if(bI){bI.disabled=true;bI.textContent='🎨 Editando a imagem… (uns 20 s)'}
+  try{ED.anx=ED.anx||{imgs:[],docs:[],txts:[],legs:{}};const base=ED.anx.imgs[0];const r=await edApi(Object.assign({pk:ED.pk,modo:'imgia',instrucao:instr},base?{img:base}:{idx:0}));ED.anx.imgs=[await toJpeg(r.img)];if(bI)bI.textContent='⏳ Gerando PDF…'}
+  catch(e){if(bI){bI.disabled=false;bI.textContent=old}toast(/quota|429/i.test(e.message)?'A IA de imagens ainda não está liberada na conta do Google (falta ativar o faturamento da API do Gemini).':'Não consegui editar a imagem: '+e.message);return}
+  if(bI){bI.disabled=false;bI.textContent=old}}
+ return __s0.apply(this,arguments)}}
+
 })();
 </script>
 </body></html>

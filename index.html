@@ -731,4 +731,60 @@ window.buscaOrc=function(){const h=b0();const q=String(typeof BQ!=='undefined'?B
  setTimeout(ajusta,0);return h+'<div id="bArq">'+extra()+'</div>'};
 })();
 </script>
+<style id="img-ia">
+#dlgImg{position:fixed;inset:0;z-index:9999;background:rgba(6,20,45,.55);display:none;align-items:center;justify-content:center;padding:16px}
+#dlgImg.on{display:flex}
+#dlgImg .iw{background:#fff;border-radius:18px;width:100%;max-width:720px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);font:14px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827}
+#dlgImg .ih{background:var(--az,#0b4ea2);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+#dlgImg .ih h3{margin:0;flex:1;font-size:16px}
+#dlgImg .ih button{border:0;background:rgba(255,255,255,.16);color:#fff;width:34px;height:34px;border-radius:9px;font-size:16px;cursor:pointer}
+#dlgImg .ib{padding:18px;display:flex;flex-direction:column;gap:12px}
+#dlgImg label{font-weight:700;font-size:12.5px;color:#4b5563}
+#dlgImg select,#dlgImg textarea{width:100%;box-sizing:border-box;border:1px solid #d6deea;border-radius:10px;padding:9px 10px;font:inherit}
+#dlgImg textarea{min-height:80px;resize:vertical}
+#dlgImg .ibt{display:flex;flex-wrap:wrap;gap:8px}
+#dlgImg .ibt button{height:42px;padding:0 16px;border:0;border-radius:10px;font-weight:700;cursor:pointer;background:#eef2f8;color:#083b7c}
+#dlgImg .ibt button.pri{background:var(--pri,#e6007e);color:#fff}
+#dlgImg .ibt button:disabled{opacity:.5;cursor:default}
+#dlgImg .res{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+#dlgImg .res figure{margin:0;border:1px solid #e3e8f0;border-radius:12px;overflow:hidden;background:#f7f9fc}
+#dlgImg .res img{display:block;width:100%}
+#dlgImg .res figcaption{font-size:12px;color:#4b5563;padding:6px 10px}
+#dlgImg .st{font-size:13px;color:#4b5563}
+#dlgImg .st.err{color:#b42318}
+</style>
+<script>
+/* ===== Editar imagem da proposta com IA ===== */
+(function(){
+let PK='',ORC=null,NOME='',FONE='',RES='',ANEXO='';
+function dlg(){let d=document.getElementById('dlgImg');if(d)return d;d=document.createElement('div');d.id='dlgImg';
+ d.innerHTML='<div class="iw" role="dialog" aria-modal="true" aria-label="Editar imagem com IA"><div class="ih"><h3 id="imgTit">🎨 Editar imagem com IA</h3><button id="imgX" aria-label="Fechar">✕</button></div><div class="ib">'
+ +'<div><label for="imgSel">Qual imagem editar</label><select id="imgSel"></select></div>'
+ +'<div class="ibt"><label class="btn" style="display:inline-flex;align-items:center;height:42px;padding:0 14px;border-radius:10px;background:#eef2f8;color:#083b7c;font-weight:700;cursor:pointer">📎 Usar outra imagem<input type="file" accept="image/*" id="imgArq" hidden></label><span class="st" id="imgArqN"></span></div>'
+ +'<div><label for="imgTx">O que mudar na imagem</label><textarea id="imgTx" placeholder="Ex.: coloque uma base preta embaixo do letreiro com a luz de LED saindo de dentro"></textarea></div>'
+ +'<div class="ibt"><button class="pri" id="imgGo">Gerar imagem</button></div><div class="st" id="imgSt"></div><div class="res" id="imgRes"></div>'
+ +'<div class="ibt" id="imgUse" hidden><button class="pri" id="imgSalva">Usar na proposta</button><button id="imgDe">Gerar de novo</button></div>'
+ +'<div class="st">A imagem nova substitui as imagens da proposta. A proposta continua em Aprovar até vocês enviarem.</div></div></div>';
+ document.body.appendChild(d);
+ d.addEventListener('click',e=>{if(e.target===d)fecha()});d.querySelector('#imgX').onclick=fecha;
+ d.querySelector('#imgArq').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{ANEXO=await jpg(f);d.querySelector('#imgArqN').textContent=f.name;d.querySelector('#imgSel').value='arq'}catch(x){d.querySelector('#imgArqN').textContent='Não consegui ler esse arquivo.'}};
+ d.querySelector('#imgGo').onclick=gera;d.querySelector('#imgDe').onclick=gera;d.querySelector('#imgSalva').onclick=usa;
+ return d}
+function fecha(){document.getElementById('dlgImg').classList.remove('on')}
+function st(t,err){const s=document.getElementById('imgSt');s.textContent=t;s.className='st'+(err?' err':'')}
+window.editarImgIA=async function(pk){const d=dlg();PK=String(pk);RES='';ANEXO='';d.classList.add('on');d.querySelector('#imgTit').textContent='🎨 Editar imagem com IA · Proposta Nº '+PK;d.querySelector('#imgRes').innerHTML='';d.querySelector('#imgUse').hidden=true;d.querySelector('#imgArqN').textContent='';st('Carregando a proposta…');
+ try{const r=await edApi({pk:PK,modo:'ler'});ORC=r.orc;NOME=r.nome||'';FONE=r.fone||'';const fs=(ORC._fotos||[]);const sel=d.querySelector('#imgSel');sel.innerHTML=fs.map((f,i)=>'<option value="'+i+'">Imagem '+(i+1)+' — '+(f.leg||'')+'</option>').join('')+'<option value="arq">Imagem anexada por mim</option>';st(fs.length?'':'Esta proposta não tem imagem. Anexe uma imagem para editar.')}catch(e){st('Erro: '+e.message,1)}};
+async function gera(){const d=dlg();const tx=d.querySelector('#imgTx').value.trim();if(!tx){st('Escreva o que mudar na imagem.',1);return}const v=d.querySelector('#imgSel').value;if(v==='arq'&&!ANEXO){st('Anexe a imagem primeiro.',1);return}
+ d.querySelector('#imgGo').disabled=true;d.querySelector('#imgUse').hidden=true;st('Gerando a imagem… leva uns 20 segundos.');
+ try{const r=await edApi(Object.assign({pk:PK,modo:'imgia',instrucao:tx},v==='arq'?{img:ANEXO}:{idx:Number(v)}));RES=r.img;d.querySelector('#imgRes').innerHTML='<figure><img alt="Imagem gerada pela IA" src="'+RES.replace(/"/g,'')+'"><figcaption>Imagem nova</figcaption></figure>';d.querySelector('#imgUse').hidden=false;st('Confira a imagem. Se estiver boa, clique em "Usar na proposta".')}
+ catch(e){st(/quota|429/i.test(e.message)?'A IA de imagens ainda não está liberada na conta do Google (precisa ativar o faturamento da API do Gemini). Avise o administrador.':e.message,1)}
+ d.querySelector('#imgGo').disabled=false}
+async function usa(){if(!RES)return;const d=dlg();const b=d.querySelector('#imgSalva');b.disabled=true;st('Salvando na proposta…');
+ try{const im=await new Promise((ok,er)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=er;i.src=RES});let w=im.width,h=im.height,M=1600;if(w>M||h>M){const s=M/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(im,0,0,w,h);const j=c.toDataURL('image/jpeg',0.86);
+  await edApi({pk:PK,modo:'salvar',orc:ORC,nome:NOME,fone:FONE,email:'',imgs:[j]});st('Pronto! A proposta Nº '+PK+' foi atualizada com a imagem nova.');toast&&toast('Imagem da proposta atualizada');setTimeout(()=>{fecha();try{carregar()}catch(e){}},1200)}
+ catch(e){st('Não salvou: '+e.message,1)}b.disabled=false}
+function botoes(){document.querySelectorAll('button[onclick^="editar(\'"]').forEach(b=>{if(b.nextElementSibling&&b.nextElementSibling.classList.contains('btImgIA'))return;const m=String(b.getAttribute('onclick')).match(/editar\('(\d+)'\)/);if(!m)return;const n=document.createElement('button');n.className='btn mid btImgIA';n.textContent='🎨 Imagem com IA';n.onclick=()=>editarImgIA(m[1]);b.after(n)})}
+setInterval(()=>{try{botoes()}catch(e){}},1200);
+})();
+</script>
 </body></html>

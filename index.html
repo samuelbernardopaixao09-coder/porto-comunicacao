@@ -795,4 +795,21 @@ const __s0=window.edSalvar;if(typeof __s0==='function'){window.edSalvar=async fu
 
 })();
 </script>
+<script id="gestao-link">
+/* ===== Ligação com o Porto Gestão: o Comercial mostra o que está acontecendo na produção e no financeiro ===== */
+(function(){
+window.GST={};let GV=-1;
+async function puxa(){try{if(typeof K==='undefined'||!K)return;const r=await fetch(API+'?k='+encodeURIComponent(K),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({a:'gestao',modo:'resumo'})});const j=await r.json().catch(()=>({}));if(!j.ok)return;window.GST=j.r||{};if(j.v!==GV){GV=j.v;try{if(typeof render==='function')render()}catch(e){}}}catch(e){}}
+const fd=s=>{if(!s)return'';const p=String(s).split('-');return p.length===3?p[2]+'/'+p[1]:s};
+const c0=window.cardOrc;if(typeof c0==='function'){window.cardOrc=function(p){let h=c0.apply(this,arguments);const g=(window.GST||{})[String(p&&p.pk||'')];if(!g||!g.job)return h;
+ const linha='<div class="gstl" style="margin-top:8px;padding:8px 10px;border-radius:10px;background:#FFF7ED;border:1px solid #FED7AA;font-size:13px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center"><b>🏭 Gestão · Job '+esc(g.job)+'</b><span>Etapa: <b>'+esc(g.etapa||'—')+'</b></span><span>'+esc(g.status||'')+'</span><span>Cobrança: <b>'+esc(g.cobranca||'—')+'</b></span>'+(g.entrega?'<span>Entrega: <b>'+esc(fd(g.entrega))+'</b></span>':'')+'<span>NF: '+esc(g.nf||'—')+'</span><a class="btn mid" style="text-decoration:none" target="_blank" rel="noopener" href="gestao.html#os?job='+encodeURIComponent(g.job)+'">🛠️ Abrir OS no Gestão</a></div>';
+ const i=h.lastIndexOf('<div class="acts">');return i>0?h.slice(0,i)+linha+h.slice(i):h+linha}}
+/* a Ordem de Serviço agora vive no Gestão: se o pedido já tem Job lá, abre a OS do Gestão */
+const os0=window.os;if(typeof os0==='function'){window.os=function(pk){const g=(window.GST||{})[String(pk)];if(g&&g.job){window.open('gestao.html#os?job='+encodeURIComponent(g.job),'_blank','noopener');return}return os0.apply(this,arguments)}}
+/* botão do Gestão no menu */
+function botao(){const n=document.getElementById('nav');if(!n||n.querySelector('.btGest'))return;const a=document.createElement('a');a.className='btGest';a.href='gestao.html';a.target='_blank';a.rel='noopener';a.textContent='🏭 Gestão';a.style.cssText='display:inline-flex;align-items:center;padding:0 12px;height:36px;border-radius:10px;text-decoration:none;font-weight:700;background:#FFF7ED;color:#9A3412;white-space:nowrap';const pr=n.querySelector('.btPr');pr?pr.after(a):n.appendChild(a)}
+setInterval(()=>{try{botao()}catch(e){}},1500);
+setTimeout(puxa,1500);setInterval(()=>{if(document.visibilityState==='visible')puxa()},60000);
+})();
+</script>
 </body></html>

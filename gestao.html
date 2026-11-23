@@ -504,7 +504,7 @@ function cardify(r){if(r==='relatorios')return;const v=$('#view');
  if(r==='inicio'){const m={'Vendas aprovadas no mês':'propostas','Propostas em aberto':'negociacao','Jobs em produção':'jobs','Lucro estimado do mês':'relatorios','A receber':'receber','A pagar':'pagar','Funil de vendas':'negociacao','Saldo das contas':'movimentacoes','Fechamentos previstos este mês':'negociacao','Tarefas de hoje':'agenda'};v.querySelectorAll('.card').forEach(c=>{const t=(c.querySelector('.lb,h2')||{}).textContent||'';const k=Object.keys(m).find(x=>t.startsWith(x));if(k){c.classList.add('kclick');c.title='Abrir '+k;c.onclick=()=>{if(k.startsWith('Lucro'))REL='dre';location.hash=m[k]}}})}
 }
 /* ---------- roteamento ---------- */
-function rota(){let r=(location.hash||'').slice(1);if(!V[r])r='inicio';return r}
+function rota(){let r=(location.hash||'').slice(1);const qi=r.indexOf('?');if(qi>=0){const q=new URLSearchParams(r.slice(qi+1));r=r.slice(0,qi);const jn=q.get('job');if(jn&&DB&&DB.jobs){const j=DB.jobs.find(x=>x.num===jn);if(j)OSSEL=j.id}}if(!V[r])r='inicio';return r}
 function render(){const r=rota();desenhaMenu(r);const it=ROTA[r];$('#crumb').innerHTML=it?(it.g.n!==it.n?esc(it.g.n)+' / ':'')+'<b>'+esc(it.n)+'</b>':'';$('#view').innerHTML=V[r]();cardify(r);liga(r);$('#side').classList.remove('open');$('#scrim').classList.remove('on')}
 function liga(r){const v=$('#view');
  const q=v.querySelector('#q');if(q){q.oninput=()=>{BUSCA=q.value.toLowerCase();const p=q.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(p,p)}}

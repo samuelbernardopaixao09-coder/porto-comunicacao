@@ -286,12 +286,12 @@ const MENU=[
  {k:'aj',n:'Ajustes',c:'#94A3B8',r:'ajustes'}
 ];
 const ROTA={};MENU.forEach(g=>{if(g.r)ROTA[g.r]={g,n:g.n};(g.sub||[]).forEach(([r,n])=>ROTA[r]={g,n})});
-let abertos=new Set();
-function desenhaMenu(atual){const g0=(ROTA[atual]||{}).g;if(g0)abertos.add(g0.k);
+let abertos=new Set();let ULTG='';
+function desenhaMenu(atual){const g0=(ROTA[atual]||{}).g;if(g0&&g0.k!==ULTG){abertos=new Set([g0.k]);ULTG=g0.k}
  $('#nav').innerHTML=MENU.map(g=>{const on=g0&&g0.k===g.k;const tile='<span class="tile" style="background:'+(on?g.c:g.c+'26')+';color:'+(on?'#0B1220':g.c)+'">'+IC[g.k]+'</span>';
   if(g.r)return '<div class="grp"><a class="gbtn'+(on?' on':'')+'" href="#'+g.r+'" style="text-decoration:none">'+tile+g.n+'</a></div>';
   return '<div class="grp'+(abertos.has(g.k)?' open':'')+'" data-g="'+g.k+'"><button class="gbtn'+(on?' on':'')+'" aria-expanded="'+abertos.has(g.k)+'">'+tile+g.n+'<span class="chev">'+IC.chev.replace('<svg','<svg width="16" height="16"')+'</span></button><div class="sub">'+g.sub.map(([r,n])=>'<a href="#'+r+'" class="'+(r===atual?'on':'')+'">'+n+'</a>').join('')+'</div></div>'}).join('');
- $('#nav').querySelectorAll('.grp[data-g] > button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.g;abertos.has(k)?abertos.delete(k):abertos.add(k);b.parentElement.classList.toggle('open');b.setAttribute('aria-expanded',abertos.has(k))});
+ $('#nav').querySelectorAll('.grp[data-g] > button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.g;const ia=abertos.has(k);abertos=new Set();$('#nav').querySelectorAll('.grp[data-g]').forEach(x=>{x.classList.remove('open');const bb=x.querySelector(':scope > button');if(bb)bb.setAttribute('aria-expanded','false')});if(!ia){abertos.add(k);b.parentElement.classList.add('open');b.setAttribute('aria-expanded','true')}});
 }
 /* ---------- dados de exemplo ---------- */
 const DB0={"clientes": [], "fornecedores": [], "funcionarios": [], "agencias": [], "telefones": [], "materias": [], "equipamentos": [], "processos": [], "centros": [], "terceirizados": [], "produtos": [], "negocios": [], "jobs": [], "receber": [], "pagar": [], "fixas": [], "movs": [], "notas": [], "cartoes": [], "compras": [], "movEst": [], "estoqueHP": [], "conversas": [], "campanhas": [], "agenda": [], "meta": 0, "saldo": 0, "atualizado": ""};

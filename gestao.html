@@ -14,19 +14,19 @@
 <style>
 /* Layout: menu lateral grafite fixo (sempre escuro) + área de trabalho clara/escura com tabelas, quadros e calculadoras */
 :root{
-  --bg:#F5F7FA;--surface:#FFFFFF;--surface2:#FAFBFD;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
   --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
   --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;
   --f-text:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--f-head:"Space Grotesk",Inter,system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0B1424;--surface:#121E33;--surface2:#0E1829;--fg:#E6EDF7;--muted:#9AAAC2;--line:#22324D;
-  --side:#071A33;--side2:#0D2A4F;--sidefg:#C9D8EE;--sideline:#163A66;
-  --accent:#FF8A3D;--accentfg:#1A0E05;--ok:#4ADE80;--okbg:#0F2E1C;--warn:#FCD34D;--warnbg:#3A2A06;--bad:#FCA5A5;--badbg:#3B1212;--info:#93C5FD;--infobg:#132544;color-scheme:dark}}
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
+  --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;color-scheme:light}}
 :root[data-theme="dark"]{
-  --bg:#0B1424;--surface:#121E33;--surface2:#0E1829;--fg:#E6EDF7;--muted:#9AAAC2;--line:#22324D;
-  --side:#071A33;--side2:#0D2A4F;--sidefg:#C9D8EE;--sideline:#163A66;
-  --accent:#FF8A3D;--accentfg:#1A0E05;--ok:#4ADE80;--okbg:#0F2E1C;--warn:#FCD34D;--warnbg:#3A2A06;--bad:#FCA5A5;--badbg:#3B1212;--info:#93C5FD;--infobg:#132544;color-scheme:dark}
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
+  --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;color-scheme:light}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-text);font-size:14px;margin:0}
@@ -412,8 +412,8 @@ V.inicio=()=>{if(QUEM==='planejamento')return painelPlan();const mes=DB.negocios
  '<div class="card kpi"><div class="lb">Lucro estimado do mês</div><div class="vl '+(lucro<0?'down':'up')+'">'+brl(lucro)+'</div><div class="dt">vendas aprovadas − contas a pagar de novembro</div></div></div>'+
  '<div class="grid g2"><div class="card"><h2>A receber</h2><div class="split"><div><span>Hoje</span><b class="up">'+brl(somaR(hj))+'</b></div><div><span>Amanhã</span><b>'+brl(somaR(x=>x.venc===addD(1)))+'</b></div><div><span>Semana</span><b>'+brl(somaR(ate(7)))+'</b></div><div><span>Mês</span><b>'+brl(somaR(ate(30)))+'</b></div></div></div>'+
  '<div class="card"><h2>A pagar</h2><div class="split"><div><span>Hoje</span><b class="down">'+brl(somaP(hj))+'</b></div><div><span>Amanhã</span><b>'+brl(somaP(x=>x.venc===addD(1)))+'</b></div><div><span>Semana</span><b>'+brl(somaP(ate(7)))+'</b></div><div><span>Mês</span><b>'+brl(somaP(ate(30)))+'</b></div></div></div></div>'+
- '<div class="grid g2"><div class="card"><h2>Funil de vendas</h2>'+etapas.map((e,i)=>'<div style="display:grid;grid-template-columns:120px 1fr 28px;gap:10px;align-items:center;margin:8px 0"><span class="note">'+e+'</span><div class="bar" style="height:14px"><i style="width:'+(cont[i]/mx*100)+'%;background:#F472B6"></i></div><b>'+cont[i]+'</b></div>').join('')+'</div>'+
- '<div class="card"><h2>Propostas emitidas nos últimos 14 dias (R$)</h2><svg class="ch" viewBox="0 0 560 190" width="100%" role="img" aria-label="Gráfico de vendas por dia">'+[0,.5,1].map(f=>'<line x1="40" x2="555" y1="'+(160-f*140)+'" y2="'+(160-f*140)+'" stroke="currentColor" opacity=".12"/><text x="34" y="'+(164-f*140)+'" text-anchor="end">'+Math.round(mxv*f/1000)+'k</text>').join('')+dias.map((d,i)=>'<rect x="'+(48+i*36)+'" y="'+(160-d[1]/mxv*140)+'" width="24" height="'+(d[1]/mxv*140)+'" rx="4" fill="#22D3EE"/><text x="'+(60+i*36)+'" y="180" text-anchor="middle">'+d[0].slice(8)+'</text>').join('')+'</svg></div></div>'+
+ '<div class="grid g2"><div class="card"><h2>Funil de vendas</h2>'+etapas.map((e,i)=>'<div style="display:grid;grid-template-columns:120px 1fr 28px;gap:10px;align-items:center;margin:8px 0"><span class="note">'+e+'</span><div class="bar" style="height:14px"><i style="width:'+(cont[i]/mx*100)+'%;background:var(--accent)"></i></div><b>'+cont[i]+'</b></div>').join('')+'</div>'+
+ '<div class="card"><h2>Propostas emitidas nos últimos 14 dias (R$)</h2><svg class="ch" viewBox="0 0 560 190" width="100%" role="img" aria-label="Gráfico de vendas por dia">'+[0,.5,1].map(f=>'<line x1="40" x2="555" y1="'+(160-f*140)+'" y2="'+(160-f*140)+'" stroke="currentColor" opacity=".12"/><text x="34" y="'+(164-f*140)+'" text-anchor="end">'+Math.round(mxv*f/1000)+'k</text>').join('')+dias.map((d,i)=>'<rect x="'+(48+i*36)+'" y="'+(160-d[1]/mxv*140)+'" width="24" height="'+(d[1]/mxv*140)+'" rx="4" style="fill:var(--accent)"/><text x="'+(60+i*36)+'" y="180" text-anchor="middle">'+d[0].slice(8)+'</text>').join('')+'</svg></div></div>'+
  '<div class="grid g3"><div class="card"><h2>Saldo das contas</h2><div class="big">'+brl(DB.saldo)+'</div><p class="note">Sicredi · conta principal (Holdprint, 23/11)</p></div>'+
  '<div class="card"><h2>Fechamentos previstos este mês</h2>'+abertos.slice(0,4).map(n=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span>'+esc(n.titulo)+'<br><small class="note">'+esc(n.cliente)+' · '+dfmt(n.prazo)+'</small></span><b>'+din(n.valor)+'</b></div>').join('')+'</div>'+
  '<div class="card"><h2>Tarefas de hoje</h2>'+DB.agenda.filter(a=>a.data===iso(HOJE)||a.data===addD(1)).map(a=>'<div style="display:flex;gap:8px;align-items:center;padding:6px 0"><span style="width:9px;height:9px;border-radius:50%;background:'+a.c+'"></span>'+esc(a.t)+' <small class="note">'+dfmt(a.data)+'</small></div>').join('')+'<p class="note">Atrasadas: '+DB.jobs.filter(j=>j.status==='Atrasado').map(j=>j.num).join(', ')+'</p></div></div>'};

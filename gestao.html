@@ -351,7 +351,7 @@ function pedeLogin(){try{localStorage.removeItem('ppk')}catch(e){}location.repla
    if(!j.ok||!j.token){m.textContent=j.erro||'Usuário ou senha errados.';b.disabled=false;return}
    K=j.token;try{localStorage.setItem('ppk',K);localStorage.setItem('pu',j.u||'')}catch(x){}d.remove();carrega(true)}
   catch(x){m.textContent='Sem conexão. Tente de novo.';b.disabled=false}}}
-setInterval(()=>{if(K&&document.visibilityState==='visible')carrega(false)},45000);
+setInterval(()=>{if(K&&document.visibilityState==='visible'&&document.hasFocus())carrega(false)},180000);
 addEventListener('beforeunload',e=>{if(SUJO||SALVANDO){e.preventDefault();e.returnValue=''}});
 /* ---------- componentes ---------- */
 function cab(r,desc,btns){const it=ROTA[r]||{g:MENU[0],n:''};const g=it.g;return '<div class="vh"><span class="tile" style="background:'+g.c+'26;color:'+g.c+'">'+IC[g.k]+'</span><div class="grow"><h1>'+esc(it.n)+'</h1>'+(desc?'<p>'+desc+'</p>':'')+'</div>'+(btns||'')+'</div>'}

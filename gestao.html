@@ -14,17 +14,17 @@
 <style>
 /* Layout: menu lateral grafite fixo (sempre escuro) + área de trabalho clara/escura com tabelas, quadros e calculadoras */
 :root{
-  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#C3CEDC;
   --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
   --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;
   --f-text:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--f-head:"Space Grotesk",Inter,system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#C3CEDC;
   --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
   --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;color-scheme:light}}
 :root[data-theme="dark"]{
-  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F7F9FC;--fg:#111827;--muted:#4B5563;--line:#C3CEDC;
   --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
   --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;color-scheme:light}
 *{box-sizing:border-box}
@@ -215,6 +215,7 @@ svg.ch text{fill:var(--muted);font-size:11px}
 #pgLogin input{height:42px;border-radius:10px;border:1px solid #334155;background:#0B1220;color:#F8FAFC;padding:0 12px;font:inherit}
 #pgLogin small{color:#F87171;min-height:16px;text-align:center}
 .tile.emo{background:rgba(255,255,255,.08);color:inherit;font-size:17px;line-height:1}.tile.emo.on{background:rgba(255,255,255,.15);box-shadow:inset 3px 0 0 var(--accent)}.vh .tile.emo.hd{background:var(--surface);border:1px solid var(--line);font-size:22px}.sub a .se{display:inline-block;width:24px;font-size:14px}
+.card,.kc,.col,.rcard,.lcard,.tbox{border-width:1.5px;box-shadow:0 2px 8px rgba(10,46,92,.08)}.card:hover,.rcard:hover,.lcard:hover{box-shadow:0 4px 14px rgba(10,46,92,.12)}.gsearch,.btn,.fld input,.fld select,.fld textarea,.tools .search{border-width:1.5px}
 </style>
 </head>
 <body>

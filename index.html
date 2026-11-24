@@ -240,7 +240,7 @@ const meses=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getM
 const mx=Math.max(1,...meses.map(m=>m.e)),W=600,Hh=150,bw=W/6;let svg='<svg class="svg" viewBox="0 0 '+W+' '+(Hh+18)+'" width="100%">';meses.forEach((m,i)=>{const h1=m.e/mx*Hh,h2=m.p/mx*Hh,x=i*bw+bw*0.2;svg+='<rect x="'+x+'" y="'+(Hh-h1)+'" width="'+bw*0.28+'" height="'+h1+'" rx="3" fill="#00aeef"><title>Enviado '+brl(m.e)+'</title></rect><rect x="'+(x+bw*0.32)+'" y="'+(Hh-h2)+'" width="'+bw*0.28+'" height="'+h2+'" rx="3" fill="#16a34a"><title>Pago '+brl(m.p)+'</title></rect><text x="'+(i*bw+bw/2)+'" y="'+(Hh+14)+'" text-anchor="middle">'+m.n+'</text>'});svg+='</svg>';
 A.innerHTML='<div class="kpis"><div class="kpi"><div class="l">Propostas no mês</div><div class="v">'+mes.length+'</div></div><div class="kpi"><div class="l">Valor proposto</div><div class="v">'+brl(tot)+'</div></div><div class="kpi"><div class="l">Pago no mês</div><div class="v" style="color:var(--ok)">'+brl(totPg)+'</div></div><div class="kpi"><div class="l">Ticket médio</div><div class="v">'+brl(mes.length?tot/mes.length:0)+'</div></div></div><div class="card"><div class="row"><h3>Últimos 6 meses</h3><span class="sp"></span><span class="mut"><span style="color:#00aeef">■</span> enviado <span style="color:#16a34a">■</span> pago</span></div>'+svg+'</div><div class="card"><div class="row"><b>Aguardando aprovação</b><span class="sp"></span><b>'+pend.length+'</b></div><div class="row" style="margin-top:6px"><b>Clientes com a equipe</b><span class="sp"></span><b>'+hum.length+'</b></div><div class="row" style="margin-top:6px"><b>Taxa de pagamento (mês)</b><span class="sp"></span><b>'+(mes.length?Math.round(pg.length/mes.length*100):0)+'%</b></div></div>'}}
 const dlg=document.getElementById('dlg');try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
-carregar();setInterval(()=>{if(!document.hidden&&!dlg.open&&TAB!='novo')carregar()},60000);
+carregar();setInterval(()=>{if(!document.hidden&&!dlg.open&&TAB!='novo')carregar()},180000);
 </script><script>
 /* ===== Anexos v3: aceita o máximo de formatos + tira as imagens de PDF/PowerPoint ===== */
 (function(){
@@ -810,7 +810,7 @@ const os0=window.os;if(typeof os0==='function'){window.os=function(pk){const g=(
 /* botão do Gestão no menu */
 function botao(){const n=document.getElementById('nav');if(!n||n.querySelector('.btGest'))return;if(typeof U!=='undefined'&&U==='comercial')return;const a=document.createElement('a');a.className='btGest';a.href='gestao.html';a.target='_blank';a.rel='noopener';a.textContent='🏭 Gestão';a.style.cssText='display:inline-flex;align-items:center;padding:0 12px;height:36px;border-radius:10px;text-decoration:none;font-weight:700;background:#FFF7ED;color:#9A3412;white-space:nowrap';const pr=n.querySelector('.btPr');pr?pr.after(a):n.appendChild(a)}
 setInterval(()=>{try{botao()}catch(e){}},1500);
-setTimeout(puxa,1500);setInterval(()=>{if(document.visibilityState==='visible')puxa()},60000);
+setTimeout(puxa,1500);setInterval(()=>{if(document.visibilityState==='visible')puxa()},300000);
 })();
 </script>
 </body></html>

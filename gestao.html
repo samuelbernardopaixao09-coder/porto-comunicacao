@@ -14,17 +14,19 @@
 <style>
 /* Layout: menu lateral grafite fixo (sempre escuro) + área de trabalho clara/escura com tabelas, quadros e calculadoras */
 :root{
-  --bg:#F3F4F6;--surface:#FFFFFF;--surface2:#F8FAFC;--fg:#111827;--muted:#4B5563;--line:#E5E7EB;
-  --side:#111827;--side2:#1F2937;--sidefg:#CBD5E1;--sideline:#263244;
-  --accent:#0E7490;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;
+  --bg:#F5F7FA;--surface:#FFFFFF;--surface2:#FAFBFD;--fg:#111827;--muted:#4B5563;--line:#E3E8EF;
+  --side:#0A2E5C;--side2:#0D3A73;--sidefg:#D3E1F5;--sideline:#1C4A82;
+  --accent:#F26B1D;--accentfg:#FFFFFF;--ok:#15803D;--okbg:#DCFCE7;--warn:#92400E;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FEE2E2;--info:#1D4ED8;--infobg:#DBEAFE;
   --f-text:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--f-head:"Space Grotesk",Inter,system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0B1018;--surface:#141B26;--surface2:#101722;--fg:#E5E7EB;--muted:#9CA3AF;--line:#243042;
-  --accent:#22D3EE;--accentfg:#0B1220;--ok:#4ADE80;--okbg:#0F2E1C;--warn:#FCD34D;--warnbg:#3A2A06;--bad:#FCA5A5;--badbg:#3B1212;--info:#93C5FD;--infobg:#132544;color-scheme:dark}}
+  --bg:#0B1424;--surface:#121E33;--surface2:#0E1829;--fg:#E6EDF7;--muted:#9AAAC2;--line:#22324D;
+  --side:#071A33;--side2:#0D2A4F;--sidefg:#C9D8EE;--sideline:#163A66;
+  --accent:#FF8A3D;--accentfg:#1A0E05;--ok:#4ADE80;--okbg:#0F2E1C;--warn:#FCD34D;--warnbg:#3A2A06;--bad:#FCA5A5;--badbg:#3B1212;--info:#93C5FD;--infobg:#132544;color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0B1018;--surface:#141B26;--surface2:#101722;--fg:#E5E7EB;--muted:#9CA3AF;--line:#243042;
-  --accent:#22D3EE;--accentfg:#0B1220;--ok:#4ADE80;--okbg:#0F2E1C;--warn:#FCD34D;--warnbg:#3A2A06;--bad:#FCA5A5;--badbg:#3B1212;--info:#93C5FD;--infobg:#132544;color-scheme:dark}
+  --bg:#0B1424;--surface:#121E33;--surface2:#0E1829;--fg:#E6EDF7;--muted:#9AAAC2;--line:#22324D;
+  --side:#071A33;--side2:#0D2A4F;--sidefg:#C9D8EE;--sideline:#163A66;
+  --accent:#FF8A3D;--accentfg:#1A0E05;--ok:#4ADE80;--okbg:#0F2E1C;--warn:#FCD34D;--warnbg:#3A2A06;--bad:#FCA5A5;--badbg:#3B1212;--info:#93C5FD;--infobg:#132544;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-text);font-size:14px;margin:0}
@@ -212,6 +214,7 @@ svg.ch text{fill:var(--muted);font-size:11px}
 #pgLogin label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#CBD5E1}
 #pgLogin input{height:42px;border-radius:10px;border:1px solid #334155;background:#0B1220;color:#F8FAFC;padding:0 12px;font:inherit}
 #pgLogin small{color:#F87171;min-height:16px;text-align:center}
+.tile.emo{background:rgba(255,255,255,.08);color:inherit;font-size:17px;line-height:1}.tile.emo.on{background:rgba(255,255,255,.15);box-shadow:inset 3px 0 0 var(--accent)}.vh .tile.emo.hd{background:var(--surface);border:1px solid var(--line);font-size:22px}.sub a .se{display:inline-block;width:24px;font-size:14px}
 </style>
 </head>
 <body>
@@ -276,6 +279,8 @@ const IC={
  plus:S('<path d="M12 5v14M5 12h14"/>'),search:S('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),chev:S('<path d="m9 18 6-6-6-6"/>'),x:S('<path d="M18 6 6 18M6 6l12 12"/>')
 };
 /* ---------- menu ---------- */
+const EMO={inicio:'▦',agenda:'🗓️',cad:'👥',cus:'🧮',crm:'💼',at:'💬',prod:'🏭',fin:'💰',est:'📦',rel:'📈',aj:'⚙️'};
+const SEMO={clientes:'👤',fornecedores:'🚚',funcionarios:'🧑‍🔧',agencias:'🏢',telefones:'☎️',produtos:'🏷️','materia-prima':'🧱',processos:'🔧',equipamentos:'🖨️','centros-custo':'🗂️',terceirizados:'🤝',negociacao:'📊',propostas:'📄',conversas:'💬',contatos:'📇',campanhas:'📣',acompanhamento:'👀',jobs:'🛠️',os:'🧾',terminal:'🖥️',planejamento:'📋',receber:'⬇️',pagar:'⬆️','despesas-fixas':'📌',movimentacoes:'🔁',conciliacao:'🏦',cartao:'💳',notas:'🧾',estoque:'📦',compras:'🛒','mov-estoque':'🔄'};
 const MENU=[
  {k:'inicio',n:'Visão geral',c:'#22D3EE',r:'inicio'},
  {k:'agenda',n:'Agenda',c:'#A78BFA',r:'agenda'},
@@ -297,9 +302,9 @@ const PLAN_RO=new Set(['clientes','fornecedores','produtos','equipamentos','proc
 function menuVis(){if(QUEM!=='planejamento')return MENU;return MENU.map(g=>g.r?(PLAN_R.has(g.r)?g:null):Object.assign({},g,{sub:g.sub.filter(x=>PLAN_R.has(x[0]))})).filter(g=>g&&(g.r||g.sub.length))}
 function soLeitura(r){const v=$('#view');if(!v||!PLAN_RO.has(r))return;v.querySelectorAll('button,a.btn').forEach(b=>{if(/Editar|Novo|Nova|Excluir|Montar|Salvar|Enviar|Remover|Apagar|Adicionar/i.test(b.textContent))b.style.display='none'});v.querySelectorAll('textarea,select,input').forEach(i=>{if(!/busca|buscar|filtr|pesquis/i.test((i.placeholder||'')+' '+(i.getAttribute('aria-label')||'')))i.disabled=true});const h=v.querySelector('.vh');if(h&&!v.querySelector('.soLer')){const p=document.createElement('p');p.className='note soLer';p.textContent='Somente consulta para o Planejamento.';h.after(p)}}
 function desenhaMenu(atual){const g0=(ROTA[atual]||{}).g;if(g0&&g0.k!==ULTG){abertos=new Set([g0.k]);ULTG=g0.k}
- $('#nav').innerHTML=menuVis().map(g=>{const on=g0&&g0.k===g.k;const tile='<span class="tile" style="background:'+(on?g.c:g.c+'26')+';color:'+(on?'#0B1220':g.c)+'">'+IC[g.k]+'</span>';
+ $('#nav').innerHTML=menuVis().map(g=>{const on=g0&&g0.k===g.k;const tile='<span class="tile emo'+(on?' on':'')+'">'+(EMO[g.k]||IC[g.k])+'</span>';
   if(g.r)return '<div class="grp"><a class="gbtn'+(on?' on':'')+'" href="#'+g.r+'" style="text-decoration:none">'+tile+g.n+'</a></div>';
-  return '<div class="grp'+(abertos.has(g.k)?' open':'')+'" data-g="'+g.k+'"><button class="gbtn'+(on?' on':'')+'" aria-expanded="'+abertos.has(g.k)+'">'+tile+g.n+'<span class="chev">'+IC.chev.replace('<svg','<svg width="16" height="16"')+'</span></button><div class="sub">'+g.sub.map(([r,n])=>'<a href="#'+r+'" class="'+(r===atual?'on':'')+'">'+n+'</a>').join('')+'</div></div>'}).join('');
+  return '<div class="grp'+(abertos.has(g.k)?' open':'')+'" data-g="'+g.k+'"><button class="gbtn'+(on?' on':'')+'" aria-expanded="'+abertos.has(g.k)+'">'+tile+g.n+'<span class="chev">'+IC.chev.replace('<svg','<svg width="16" height="16"')+'</span></button><div class="sub">'+g.sub.map(([r,n])=>'<a href="#'+r+'" class="'+(r===atual?'on':'')+'">'+(SEMO[r]?'<span class="se">'+SEMO[r]+'</span>':'')+n+'</a>').join('')+'</div></div>'}).join('');
  $('#nav').querySelectorAll('.grp[data-g] > button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.g;const ia=abertos.has(k);abertos=new Set();$('#nav').querySelectorAll('.grp[data-g]').forEach(x=>{x.classList.remove('open');const bb=x.querySelector(':scope > button');if(bb)bb.setAttribute('aria-expanded','false')});if(!ia){abertos.add(k);b.parentElement.classList.add('open');b.setAttribute('aria-expanded','true')}});
 }
 /* ---------- dados de exemplo ---------- */
@@ -354,7 +359,7 @@ function pedeLogin(){try{localStorage.removeItem('ppk')}catch(e){}location.repla
 setInterval(()=>{if(K&&document.visibilityState==='visible'&&document.hasFocus())carrega(false)},180000);
 addEventListener('beforeunload',e=>{if(SUJO||SALVANDO){e.preventDefault();e.returnValue=''}});
 /* ---------- componentes ---------- */
-function cab(r,desc,btns){const it=ROTA[r]||{g:MENU[0],n:''};const g=it.g;return '<div class="vh"><span class="tile" style="background:'+g.c+'26;color:'+g.c+'">'+IC[g.k]+'</span><div class="grow"><h1>'+esc(it.n)+'</h1>'+(desc?'<p>'+desc+'</p>':'')+'</div>'+(btns||'')+'</div>'}
+function cab(r,desc,btns){const it=ROTA[r]||{g:MENU[0],n:''};const g=it.g;return '<div class="vh"><span class="tile emo hd">'+(EMO[g.k]||IC[g.k])+'</span><div class="grow"><h1>'+esc(it.n)+'</h1>'+(desc?'<p>'+desc+'</p>':'')+'</div>'+(btns||'')+'</div>'}
 const stPill=s=>{const m={'Ativo':'ok','Inativo':'mut','Pago':'ok','Aberto':'info','Vencido':'bad','Emitida':'ok','Pré-faturamento':'warn','Pendente':'warn','Faturado':'info','Aguardando':'warn','Adiantamento':'info','Em produção':'info','Atrasado':'bad','Aguardando arte':'warn','Finalizado':'ok','Autorizado':'info','Solicitado':'warn','Recebido':'ok','Agendada':'info','Enviada':'ok','IA':'info','Equipe':'warn','Rascunho':'mut','Revisão Comercial':'warn','Não faturado':'warn','Não gerar cobrança':'mut'};return pill(s,m[s]||'mut')};
 /* tabela genérica com busca, filtro de status, novo/editar/excluir */
 const TAB={

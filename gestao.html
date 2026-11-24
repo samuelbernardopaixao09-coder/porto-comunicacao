@@ -307,7 +307,7 @@ const DB0={"clientes": [], "fornecedores": [], "funcionarios": [], "agencias": [
 let DB;try{DB=JSON.parse(localStorage.getItem('pgCache')||'null')}catch(e){}
 try{if(!localStorage.getItem('ppk'))DB=null}catch(e){}
 if(!DB||!DB.produtos)DB=JSON.parse(JSON.stringify(DB0));
-const API='https://portocomunicacao.app.n8n.cloud/webhook/app-porto';
+const API='https://porto-api.samuelbernardopaixao09.workers.dev/webhook/app-porto';
 let K='';try{K=localStorage.getItem('ppk')||''}catch(e){}
 let VER=-1,SALVANDO=false,SUJO=false,TM=0,QUEM='';
 async function api(body){const r=await fetch(API+'?k='+encodeURIComponent(K),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({a:'gestao'},body))});const j=await r.json().catch(()=>({}));if(r.status===401||r.status===403||j.negado||(!j.ok&&!j.erro&&!j.conflito)){const e=new Error('login');e.login=1;throw e}return j}

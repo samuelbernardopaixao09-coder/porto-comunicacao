@@ -584,32 +584,69 @@ function criaJob(n){DB.jobs.unshift({id:uid(),num:'J-0'+(143+DB.jobs.length),tit
 
 /* ---------- assistente de suporte (IA) ---------- */
 const IAH=[];let IA_ON=false;
-function iaResumo(){const s=x=>x==null?null:x;return JSON.stringify({hoje:iso(HOJE),saldo:DB.saldo,meta:DB.meta,
- contas_a_pagar:DB.pagar.map(x=>[x.venc,x.desc,x.fornecedor,x.valor,x.status]),contas_a_receber:DB.receber.map(x=>[x.venc,x.desc,x.cliente,x.valor,x.status]),
- despesas_fixas:DB.fixas.map(x=>[x.desc,x.freq,x.valor]),propostas:DB.negocios.map(n=>[n.num,n.cliente,n.titulo,n.etapa,s(n.valor),n.prazo]),
- jobs:DB.jobs.map(j=>[j.num,j.cliente,j.titulo,j.etapa,j.status,s(j.valor)]),tabela_precos:DB.produtos.map(p=>[p.id,p.nome,p.un,p.preco,p.min||0]),
- custo_por_produto:DB.produtos.filter(p=>p.mats.length||p.procs.length).map(p=>{const c=custoProduto(p);return [p.nome,Math.round(c.custo*100)/100,p.preco]}),
- materiais_custo:DB.materias.map(m=>[m.nome,m.un,m.custo,m.estoque]),centros_custo_valor_hora:DB.centros.filter(k=>k.nhp).map(k=>[k.nome,Math.round((k.despesas+k.absorvido+k.rateado)/k.nhp*100)/100]),
- estoque:DB.estoqueHP.map(m=>[m.nome,m.qtd,m.un]),conversas:DB.conversas.map(c=>[c.nome,c.estado,c.ult]),clientes:DB.clientes.map(c=>c.nome),fornecedores:DB.fornecedores.map(f=>f.nome),
- telas:MENU.map(g=>g.n+(g.sub?': '+g.sub.map(x=>x[1]).join(', '):''))})}
+const iaN=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+const iaD=s=>String(s==null?'':s).replace(/\D/g,'');
+const IA_LN={jobs:'OS',negocios:'proposta',pagar:'conta a pagar',receber:'conta a receber',agenda:'agenda',clientes:'cliente',fornecedores:'fornecedor',compras:'pedido de compra',estoqueHP:'estoque',produtos:'produto',fixas:'despesa fixa',funcionarios:'funcionário'};
+const IA_LISTAS=Object.keys(IA_LN);
+function iaResumo(){const s=x=>x==null?null:x;const u=(l,n)=>(Array.isArray(l)?l:[]).slice(0,n);let cpp=[];try{cpp=(DB.produtos||[]).filter(p=>(p.mats||[]).length||(p.procs||[]).length).map(p=>{const c=custoProduto(p);return [p.nome,Math.round(c.custo*100)/100,p.preco]})}catch(e){}
+ return JSON.stringify({hoje:iso(HOJE),dia_semana:new Date().toLocaleDateString('pt-BR',{weekday:'long'}),tela_atual:(ROTA[(location.hash||'#inicio').slice(1)]||{}).n||'',usuario:QUEM,saldo:DB.saldo,meta:DB.meta,
+ os_jobs:u(DB.jobs,150).map(j=>[j.num,j.cliente,j.titulo,j.etapa,j.status,s(j.valor),j.entrega]),
+ propostas:u(DB.negocios,150).map(n=>[n.num,n.cliente,n.titulo,n.etapa,s(n.valor),n.prazo]),
+ contas_a_pagar:u(DB.pagar,120).map(x=>[x.venc,x.desc,x.fornecedor,x.valor,x.status]),
+ contas_a_receber:u(DB.receber,120).map(x=>[x.venc,x.desc,x.cliente,x.valor,x.status]),
+ agenda:u(DB.agenda,60).map(a=>[a.data,a.t]),despesas_fixas:u(DB.fixas,60).map(x=>[x.desc,x.freq,x.valor]),
+ tabela_precos:u(DB.produtos,200).map(p=>[p.nome,p.un,p.preco,p.min||0]),custo_por_produto:cpp,
+ materiais_custo:u(DB.materias,120).map(m=>[m.nome,m.un,m.custo,m.estoque]),estoque:u(DB.estoqueHP,120).map(m=>[m.nome,m.qtd,m.un]),
+ pedidos_compra:u(DB.compras,40).map(c=>[c.num||c.id,c.fornecedor,c.desc||c.item||c.titulo,c.status,s(c.valor)]),
+ conversas:u(DB.conversas,30).map(c=>[c.nome,c.estado,c.ult]),
+ clientes:u(DB.clientes,400).map(c=>c.nome),fornecedores:u(DB.fornecedores,200).map(f=>f.nome),funcionarios:u(DB.funcionarios,50).map(f=>f.nome),
+ telas:Object.entries(ROTA).map(([r,v])=>r+'='+v.n)})}
 function iaBolha(t,quem){const b=document.createElement('div');b.className='bub '+(quem==='u'?'a':'c');b.textContent=t;$('#iaMs').appendChild(b);$('#iaMs').scrollTop=1e9;return b}
 /* a IA também altera o sistema: devolve ações e a pessoa confirma */
-const IA_ACOES='\n\nSE A PESSOA PEDIR PARA ALTERAR, CRIAR OU LANÇAR ALGO NO SISTEMA: responda em 1 frase o que vai fazer e, no FINAL, coloque um bloco <acoes>[...]</acoes> com uma lista JSON. Formatos: {"op":"alterar","lista":"jobs","num":"P-681","campos":{"etapa":"Impressão"}} ou {"op":"criar","lista":"pagar","item":{"venc":"2026-12-05","desc":"Conta de luz","fornecedor":"Neoenergia","valor":350,"status":"Aberto"}}. Listas e campos: jobs (num, titulo, cliente, valor, entrega AAAA-MM-DD, etapa: Arte|Impressão|Acabamento|Montagem|Expedição|Instalação|Concluído, status: Aguardando arte|Em produção|Atrasado|Finalizado, osObs, respProd, instalador) — cada job é uma Ordem de Serviço; clientes (nome, doc, email, fone, cidade, status); fornecedores (nome, doc, categoria, contato, fone, status); pagar (venc, desc, fornecedor, valor, status: Aberto|Pago|Vencido); receber (venc, desc, cliente, valor, meio, status: Aberto|Pago|Vencido); agenda (data, t); negocios (num, etapa: Rascunho|Emitido|Enviado|Em negociação|Aceite verbal|Ganho|Perdido). Para alterar, identifique pelo "num" (jobs/negocios), pelo "nome" (clientes/fornecedores) ou pelo "id". Datas no formato AAAA-MM-DD. Se for só pergunta, NÃO coloque o bloco.';
-function iaAplica(ac){const L=['jobs','clientes','fornecedores','pagar','receber','agenda','negocios','compras','funcionarios'];let n=0;
- for(const a of ac){if(!a||!L.includes(a.lista)||!Array.isArray(DB[a.lista]))continue;const k=a.lista;
-  if(a.op==='alterar'&&a.campos&&typeof a.campos==='object'){const x=DB[k].find(o=>(a.id&&o.id===a.id)||(a.num&&String(o.num)===String(a.num))||(a.nome&&String(o.nome||'').toLowerCase()===String(a.nome).toLowerCase()));if(x){for(const [f,val] of Object.entries(a.campos)){if(f!=='id')x[f]=val}if(k==='jobs'){if(x.etapa==='Concluído')x.status='Finalizado';x.editadoPor=QUEM+' (IA)';x.editadoEm=new Date().toISOString()}n++}}
-  else if(a.op==='criar'&&a.item&&typeof a.item==='object'){DB[k].unshift(Object.assign({},a.item,{id:uid()}));n++}}
- if(n){salva();render()}return n}
-function iaAcoes(b,ac){const w=document.createElement('div');w.className='bub c';w.style.cssText='display:flex;flex-direction:column;gap:6px';const t=document.createElement('div');t.textContent='Vou fazer no sistema:';w.appendChild(t);
- ac.forEach(a=>{const d=document.createElement('div');d.className='note';d.textContent='• '+(a.op==='criar'?'Criar em ':'Alterar em ')+(a.lista||'?')+(a.num?' '+a.num:a.nome?' '+a.nome:'')+': '+Object.entries(a.campos||a.item||{}).map(([k,v])=>k+' = '+v).join(', ');w.appendChild(d)});
- const bs=document.createElement('div');bs.style.cssText='display:flex;gap:6px';const ok=document.createElement('button');ok.type='button';ok.className='btn pri sm';ok.textContent='Aplicar';const no=document.createElement('button');no.type='button';no.className='btn sm';no.textContent='Cancelar';bs.append(ok,no);w.appendChild(bs);
- ok.onclick=()=>{const n=iaAplica(ac);bs.remove();t.textContent=n?'Feito: '+n+' alteração(ões) salva(s) no sistema.':'Não encontrei o que alterar. Confira o número ou o nome.'};no.onclick=()=>{bs.remove();t.textContent='Cancelado, nada foi alterado.'};
+const IA_ACOES='\n\nREGRAS DE AÇÃO (muito importante): quando a pessoa pedir para FAZER algo (alterar, mudar, mover, passar para, criar, lançar, cadastrar, agendar, apagar, dar baixa, marcar como pago, enviar/aprovar/descartar proposta, abrir uma tela), NÃO ensine o caminho: responda em UMA frase curta dizendo o que vai ser feito e coloque no FINAL um bloco <acoes>[...]</acoes> com uma lista JSON. Pode colocar várias ações. Se faltar algo essencial (ex.: valor de uma conta nova), pergunte só isso, sem bloco. Se for só pergunta, responda sem bloco.\nFormatos:\n{"op":"alterar","lista":"jobs","busca":"681","campos":{"etapa":"Impressão"}}\n{"op":"criar","lista":"pagar","item":{"venc":"2026-12-05","desc":"Conta de luz","fornecedor":"Neoenergia","valor":350,"status":"Aberto"}}\n{"op":"excluir","lista":"agenda","busca":"reunião com Roberto"}\n{"op":"abrir","tela":"pagar"}  (use o código da lista "telas")\n{"op":"proposta","acao":"enviar|pago|descartar|alterar|atendimento","num":"692","texto":"só quando acao=alterar: o que mudar"}\n"busca" = número da OS/proposta OU nome do cliente/fornecedor OU parte da descrição.\nListas e campos: jobs (num, titulo, cliente, valor, entrega, etapa: Arte|Impressão|Acabamento|Montagem|Expedição|Instalação|Concluído, status: Aguardando arte|Em produção|Atrasado|Finalizado, osObs, respProd, instalador) = Ordens de Serviço; negocios (num, etapa: Rascunho|Emitido|Enviado|Em negociação|Aceite verbal|Ganho|Perdido, valor, prazo); clientes (nome, doc, email, fone, cidade, status); fornecedores (nome, doc, categoria, contato, fone, status); pagar (venc, desc, fornecedor, valor, status: Aberto|Pago|Vencido); receber (venc, desc, cliente, valor, meio, status: Aberto|Pago|Vencido); agenda (data, t); compras (fornecedor, desc, valor, status); estoqueHP (nome, qtd, un); produtos (nome, un, preco, min); fixas (desc, freq, valor); funcionarios (nome, funcao, fone).\nDatas sempre AAAA-MM-DD (calcule "amanhã", "sexta", "dia 10" a partir de hoje). Valores como número (ex.: 350.5). Para proposta use acao "enviar" (aprovar e mandar ao cliente), "pago" (cliente pagou), "descartar", "alterar" (com texto) ou "atendimento" (tirar de Aprovar e deixar com a equipe).';
+function iaAcha(k,a){const L=DB[k]||[];if(a.id){const x=L.find(o=>o.id===a.id);if(x)return x}
+ const q=a.busca||a.num||a.nome||'';const d=iaD(q);const t=iaN(q);
+ if(d&&d.length>=2&&!/[a-z]{3}/.test(t)){const m=L.filter(o=>iaD(o.num)===d||iaD(o.id)===d);if(m.length===1)return m[0]}
+ if(t.length<2)return null;
+ const campos=o=>[o.nome,o.cliente,o.titulo,o.desc,o.fornecedor,o.t,o.num].map(iaN).filter(Boolean);
+ const ex=L.filter(o=>campos(o).some(c=>c===t));if(ex.length===1)return ex[0];
+ const ct=L.filter(o=>campos(o).some(c=>c.includes(t)||(c.length>3&&t.includes(c))));if(ct.length===1)return ct[0];
+ return null}
+function iaTexto(a){if(a.op==='abrir')return 'Abrir a tela '+((ROTA[a.tela]||{}).n||a.tela);
+ if(a.op==='proposta')return ({enviar:'Aprovar e enviar ao cliente',pago:'Marcar como paga',descartar:'Descartar',alterar:'Pedir alteração',atendimento:'Tirar de Aprovar e deixar com a equipe'}[a.acao]||a.acao)+' — proposta Nº '+iaD(a.num)+(a.texto?' ("'+a.texto+'")':'');
+ const lb=IA_LN[a.lista]||a.lista;const kv=o=>Object.entries(o||{}).map(([k,v])=>k+': '+v).join(', ');
+ if(a.op==='criar')return 'Criar '+lb+' — '+kv(a.item);
+ if(a.op==='excluir')return 'Apagar '+lb+' "'+(a.busca||a.nome||a.num||'')+'"';
+ return 'Alterar '+lb+' "'+(a.busca||a.num||a.nome||'')+'" — '+kv(a.campos)}
+async function iaAplica(ac){let n=0;const falhas=[];let mud=false;
+ for(const a of ac){try{
+  if(!a||typeof a!=='object')continue;
+  if(a.op==='abrir'){if(ROTA[a.tela]){location.hash='#'+a.tela;n++}else falhas.push('tela '+a.tela);continue}
+  if(a.op==='proposta'){const mapa={enviar:'ok',pago:'pago',descartar:'nao',alterar:'alterar',atendimento:'mover'};const ax=mapa[a.acao];const pk=iaD(a.num);if(!ax||!pk){falhas.push('proposta '+(a.num||''));continue}
+   const r=await api(Object.assign({a:ax,pk},ax==='alterar'?{texto:String(a.texto||'')}:{}));if(r&&r.ok)n++;else falhas.push('proposta '+pk+(r&&r.erro?' ('+r.erro+')':''));continue}
+  const k=a.lista;if(!IA_LISTAS.includes(k)){falhas.push(String(k));continue}if(!Array.isArray(DB[k]))DB[k]=[];
+  if(a.op==='criar'&&a.item&&typeof a.item==='object'){DB[k].unshift(Object.assign({},a.item,{id:uid()}));n++;mud=true;continue}
+  const x=iaAcha(k,a);if(!x){falhas.push((IA_LN[k]||k)+' "'+(a.busca||a.num||a.nome||'')+'"');continue}
+  if(a.op==='excluir'){DB[k]=DB[k].filter(o=>o!==x);n++;mud=true;continue}
+  if(a.op==='alterar'&&a.campos&&typeof a.campos==='object'){for(const [f,val] of Object.entries(a.campos)){if(f!=='id')x[f]=val}if(k==='jobs'){if(x.etapa==='Concluído')x.status='Finalizado';x.editadoPor=QUEM+' (IA)';x.editadoEm=new Date().toISOString()}n++;mud=true}
+ }catch(e){falhas.push(String(e.message||e).slice(0,80))}}
+ if(mud){salva();render()}return {n,falhas}}
+function iaAcoes(b,ac){const w=document.createElement('div');w.className='bub c';w.style.cssText='display:flex;flex-direction:column;gap:6px';const t=document.createElement('div');t.textContent='Confere antes de eu fazer:';w.appendChild(t);
+ ac.forEach(a=>{const d=document.createElement('div');d.className='note';d.textContent='• '+iaTexto(a);w.appendChild(d)});
+ const bs=document.createElement('div');bs.style.cssText='display:flex;gap:6px';const ok=document.createElement('button');ok.type='button';ok.className='btn pri sm';ok.textContent='Fazer';const no=document.createElement('button');no.type='button';no.className='btn sm';no.textContent='Cancelar';bs.append(ok,no);w.appendChild(bs);
+ ok.onclick=async()=>{ok.disabled=true;no.disabled=true;t.textContent='Fazendo…';const r=await iaAplica(ac);bs.remove();t.textContent=(r.n?'Pronto: '+r.n+' feito(s).':'Não consegui fazer.')+(r.falhas.length?' Não encontrei: '+r.falhas.join('; ')+'. Me diga o número ou o nome certo.':'');$('#iaMs').scrollTop=1e9};
+ no.onclick=()=>{bs.remove();t.textContent='Cancelado, nada foi alterado.'};
  $('#iaMs').appendChild(w);$('#iaMs').scrollTop=1e9}
-async function iaPergunta(q){q=String(q||'').trim();if(!q)return;iaBolha(q,'u');const r=iaBolha('Pensando…','ia');
- const hist=IAH.slice(-6).map(([a,b])=>(a==='u'?'Usuário: ':'Assistente: ')+b).join('\n');
- const prompt='Você é o Assistente Porto, suporte do sistema de gestão da Porto Comunicação (comunicação visual em Recife). Responda em português do Brasil, curto e direto, sem emojis, como um colega que conhece o sistema. Use SOMENTE os dados abaixo para números; se não houver o dado, diga que não está no sistema. Valores em reais no formato R$ 1.234,56. Para dúvidas de uso, explique em passos curtos citando o menu (ex.: Financeiro > Contas a pagar > Nova conta a pagar). Nunca invente clientes, valores ou prazos.\n\nDADOS ATUAIS DO SISTEMA (JSON):\n'+iaResumo()+(hist?'\n\nCONVERSA ATÉ AQUI:\n'+hist:'')+'\n\nPERGUNTA: '+q;
- try{const res=await api({modo:'ia',prompt:prompt+IA_ACOES});if(!res.ok)throw new Error(res.erro||'');let tx=String(res.texto||'');let ac=null;const mm=tx.match(/<acoes>([\s\S]*?)<\/acoes>/i);if(mm){tx=tx.replace(mm[0],'').trim();try{ac=JSON.parse(mm[1].split('```json').join('').split('```').join(''))}catch(x){}}r.textContent=tx||'Certo.';IAH.push(['u',q],['ia',tx]);if(Array.isArray(ac)&&ac.length)iaAcoes(r,ac)}
- catch(e){r.textContent=e.login?'Entre de novo para usar o assistente.':(e.message||'Não consegui responder agora. Tente de novo em instantes.')}}
+function iaExtrai(tx){let ac=null;const mm=tx.match(/<acoes>([\s\S]*?)<\/acoes>/i);if(mm){tx=tx.replace(mm[0],'').trim();const js=mm[1].split('```json').join('').split('```').join('').trim();try{ac=JSON.parse(js)}catch(x){const a1=js.indexOf('['),a2=js.lastIndexOf(']');if(a1>=0&&a2>a1){try{ac=JSON.parse(js.slice(a1,a2+1))}catch(y){}}}}
+ tx=tx.replace(/```[\s\S]*?```/g,'').replace(/\*\*/g,'').trim();if(ac&&!Array.isArray(ac))ac=[ac];return {tx,ac}}
+async function iaPergunta(q){q=String(q||'').trim();if(!q)return;iaBolha(q,'u');const r=iaBolha('Pensando…','ia');const t0=Date.now();const tick=setInterval(()=>{r.textContent='Pensando… '+Math.round((Date.now()-t0)/1000)+'s'},1000);
+ const hist=IAH.slice(-8).map(([a,b])=>(a==='u'?'Usuário: ':'Assistente: ')+b).join('\n');
+ const prompt='Você é o Assistente Porto, o suporte do sistema de gestão da Porto Comunicação (comunicação visual em Recife). Fale em português do Brasil como um colega que conhece o sistema: direto, no máximo 3 frases curtas (ou uma lista de até 6 itens quando pedirem lista), sem emojis, sem markdown. Use SOMENTE os dados abaixo para números, nomes e prazos; se não estiver nos dados, diga que não achou no sistema. Valores no formato R$ 1.234,56. Entenda pedidos curtos e informais (ex.: "passa a 681 pra impressão", "paga a conta de luz", "abre contas a pagar", "quanto tenho pra receber essa semana"). Para dúvidas de uso, diga o caminho do menu em uma linha (ex.: Financeiro > Contas a pagar).\n\nDADOS ATUAIS DO SISTEMA (JSON):\n'+iaResumo()+(hist?'\n\nCONVERSA ATÉ AQUI:\n'+hist:'')+IA_ACOES+'\n\nPEDIDO DO USUÁRIO: '+q;
+ let res=null,err='';for(let k=0;k<2&&!res;k++){try{const x=await api({modo:'ia',prompt});if(x&&x.ok)res=x;else err=(x&&x.erro)||'sem resposta'}catch(e){if(e.login){err='login';break}err=e.message||'erro'}if(!res&&k===0)await new Promise(z=>setTimeout(z,1500))}
+ clearInterval(tick);
+ if(!res){r.textContent=err==='login'?'Entre de novo para usar o assistente.':'Não consegui responder agora ('+err+'). Tente de novo em instantes.';return}
+ const {tx,ac}=iaExtrai(String(res.texto||''));r.textContent=tx||'Certo.';IAH.push(['u',q],['ia',tx]);
+ if(Array.isArray(ac)&&ac.length){const so=ac.every(a=>a&&a.op==='abrir');if(so){await iaAplica(ac)}else iaAcoes(r,ac)}}
 $('#iaFab').onclick=()=>{const b=$('#iaBox');b.hidden=!b.hidden;$('#iaBal').hidden=true;if(!b.hidden)$('#iaQ').focus()};
 $('#iaX').onclick=()=>{$('#iaBox').hidden=true};
 $('#iaFrm').onsubmit=e=>{e.preventDefault();const q=$('#iaQ').value;$('#iaQ').value='';iaPergunta(q)};

@@ -17,7 +17,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Trazer o app (so na primeira vez)
         run: |
           set -e
@@ -54,7 +54,7 @@ jobs:
             rsvg-convert -w 192 -h 192 logo.svg -o site/icon-192.png
           fi
           ls -la site
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: site
       - id: deploy

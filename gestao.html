@@ -321,7 +321,10 @@ let abertos=new Set();let ULTG='';
 /* perfil Planejamento: só produção e fichas de produto, sem nenhum valor */
 const PLAN_R=new Set(['inicio','acompanhamento','jobs','os','terminal','planejamento','produtos']);
 const PLAN_RO=new Set(['produtos']);
-function menuVis(){if(QUEM!=='planejamento')return MENU;return MENU.map(g=>g.r?(PLAN_R.has(g.r)?g:null):Object.assign({},g,{sub:g.sub.filter(x=>PLAN_R.has(x[0]))})).filter(g=>g&&(g.r||g.sub.length)).map(g=>g.k==='cus'?Object.assign({},g,{n:'Produtos',sub:[['produtos','Fichas de produto']]}):g)}
+/* perfil Financeiro: só Financeiro, Cadastros e Estoque */
+const FIN_G=['fin','cad','est'];
+const FIN_R=new Set(MENU.filter(g=>FIN_G.includes(g.k)).flatMap(g=>(g.sub||[]).map(x=>x[0])));
+function menuVis(){if(QUEM==='financeiro')return FIN_G.map(k=>MENU.find(g=>g.k===k)).filter(Boolean);if(QUEM!=='planejamento')return MENU;return MENU.map(g=>g.r?(PLAN_R.has(g.r)?g:null):Object.assign({},g,{sub:g.sub.filter(x=>PLAN_R.has(x[0]))})).filter(g=>g&&(g.r||g.sub.length)).map(g=>g.k==='cus'?Object.assign({},g,{n:'Produtos',sub:[['produtos','Fichas de produto']]}):g)}
 function soLeitura(r){const v=$('#view');if(!v||!PLAN_RO.has(r))return;v.querySelectorAll('button,a.btn').forEach(b=>{if(/Editar|Novo|Nova|Excluir|Montar|Salvar|Enviar|Remover|Apagar|Adicionar/i.test(b.textContent))b.style.display='none'});v.querySelectorAll('textarea,select,input').forEach(i=>{if(!/busca|buscar|filtr|pesquis/i.test((i.placeholder||'')+' '+(i.getAttribute('aria-label')||'')))i.disabled=true});const h=v.querySelector('.vh');if(h&&!v.querySelector('.soLer')){const p=document.createElement('p');p.className='note soLer';p.textContent='Somente consulta para o Planejamento.';h.after(p)}}
 function desenhaMenu(atual){const g0=(ROTA[atual]||{}).g;if(g0&&g0.k!==ULTG){abertos=new Set([g0.k]);ULTG=g0.k}
  $('#nav').innerHTML=menuVis().map(g=>{const on=g0&&g0.k===g.k;const tile='<span class="tile emo'+(on?' on':'')+'">'+(EMO[g.k]||IC[g.k])+'</span>';
@@ -592,7 +595,7 @@ function cardify(r){if(r==='relatorios')return;const v=$('#view');
  if(r==='inicio'){const m={'Vendas aprovadas no mês':'propostas','Propostas em aberto':'negociacao','Jobs em produção':'jobs','Lucro estimado do mês':'relatorios','A receber':'receber','A pagar':'pagar','Funil de vendas':'negociacao','Saldo das contas':'movimentacoes','Fechamentos previstos este mês':'negociacao','Tarefas de hoje':'agenda'};v.querySelectorAll('.card').forEach(c=>{const t=(c.querySelector('.lb,h2')||{}).textContent||'';const k=Object.keys(m).find(x=>t.startsWith(x));if(k){c.classList.add('kclick');c.title='Abrir '+k;c.onclick=()=>{if(k.startsWith('Lucro'))REL='dre';location.hash=m[k]}}})}
 }
 /* ---------- roteamento ---------- */
-function rota(){let r=(location.hash||'').slice(1);const qi=r.indexOf('?');if(qi>=0){const q=new URLSearchParams(r.slice(qi+1));r=r.slice(0,qi);const jn=q.get('job');if(jn&&DB&&DB.jobs){const j=DB.jobs.find(x=>x.num===jn);if(j)OSSEL=j.id}}if(!V[r])r='inicio';if(QUEM==='planejamento'&&!PLAN_R.has(r))r='inicio';return r}
+function rota(){let r=(location.hash||'').slice(1);const qi=r.indexOf('?');if(qi>=0){const q=new URLSearchParams(r.slice(qi+1));r=r.slice(0,qi);const jn=q.get('job');if(jn&&DB&&DB.jobs){const j=DB.jobs.find(x=>x.num===jn);if(j)OSSEL=j.id}}if(!V[r])r='inicio';if(QUEM==='planejamento'&&!PLAN_R.has(r))r='inicio';if(QUEM==='financeiro'&&!FIN_R.has(r))r='receber';return r}
 function render(){(DB.jobs||[]).forEach(j=>{if(j.etapa==='Montagem')j.etapa='Embalagem';else if(j.etapa==='Expedição'||j.etapa==='Despache')j.etapa='Envio'});const r=rota();desenhaMenu(r);const it=ROTA[r];$('#crumb').innerHTML=it?(it.g.n!==it.n?esc(it.g.n)+' / ':'')+'<b>'+esc(it.n)+'</b>':'';$('#view').innerHTML=V[r]();cardify(r);liga(r);if(QUEM==='planejamento')soLeitura(r);$('#side').classList.remove('open');$('#scrim').classList.remove('on')}
 function liga(r){const v=$('#view');
  const q=v.querySelector('#q');if(q){q.oninput=()=>{BUSCA=q.value.toLowerCase();const p=q.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(p,p)}}

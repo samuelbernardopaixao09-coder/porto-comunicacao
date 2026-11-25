@@ -351,10 +351,20 @@ async function api(body){const r=await fetch(API+'?k='+encodeURIComponent(K),{me
 function stSync(t,c){const e=document.getElementById('syncSt');if(e){e.textContent=t;e.style.color=c||''}}
 const cache=()=>{try{localStorage.setItem('pgCache',JSON.stringify(DB))}catch(e){}};
 const salva=()=>{cache();SUJO=true;stSync('Salvando…');clearTimeout(TM);TM=setTimeout(envia,700)};
+/* quando duas pessoas salvam ao mesmo tempo: junta as mudanças das duas em vez de descartar uma */
+let BASE=null;
+function mesclaDB(base,loc,srv){const J=x=>JSON.stringify(x);const out=JSON.parse(J(srv));const comId=a=>Array.isArray(a)&&a.every(x=>x&&typeof x==='object'&&x.id!=null);
+ for(const k of Object.keys(loc)){const b=base[k],l=loc[k],s=out[k];if(J(l)===J(b))continue;
+  if(comId(l)&&comId(b||[])&&comId(s||[])){const mb=new Map((b||[]).map(x=>[String(x.id),x])),ml=new Map(l.map(x=>[String(x.id),x]));let r=(s||[]).filter(x=>!(mb.has(String(x.id))&&!ml.has(String(x.id))));
+   r=r.map(x=>{const id=String(x.id);return ml.has(id)&&mb.has(id)&&J(ml.get(id))!==J(mb.get(id))?ml.get(id):x});const ids=new Set(r.map(x=>String(x.id)));out[k]=l.filter(x=>!mb.has(String(x.id))&&!ids.has(String(x.id))).concat(r)}
+  else out[k]=l}
+ return out}
 async function envia(){if(SALVANDO){clearTimeout(TM);TM=setTimeout(envia,500);return}if(VER<0)return;SALVANDO=true;SUJO=false;
- try{const j=await api({modo:'salvar',v:VER,db:DB});
-  if(j.ok){VER=j.v;stSync(SUJO?'Salvando…':'✓ Salvo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}
-  else if(j.conflito){VER=j.v;if(j.db)DB=j.db;cache();render();toast((j.por||'Outra pessoa')+' alterou ao mesmo tempo. Atualizei a tela, refaça a última mudança.');stSync('Atualizado')}
+ try{const envio=JSON.parse(JSON.stringify(DB));const j=await api({modo:'salvar',v:VER,db:envio});
+  if(j.ok){VER=j.v;BASE=envio;stSync(SUJO?'Salvando…':'✓ Salvo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}))}
+  else if(j.conflito){VER=j.v;let junto=false;if(j.db&&BASE){try{const srv=JSON.parse(JSON.stringify(j.db));DB=mesclaDB(BASE,DB,j.db);BASE=srv;junto=true}catch(e){}}
+   if(junto){cache();render();toast((j.por||'Outra pessoa')+' salvou ao mesmo tempo. Juntei as alterações das duas.');SALVANDO=false;salva();return}
+   if(j.db){DB=j.db;BASE=JSON.parse(JSON.stringify(j.db))}cache();render();toast((j.por||'Outra pessoa')+' alterou ao mesmo tempo. Atualizei a tela, refaça a última mudança.');stSync('Atualizado')}
   else{SUJO=true;stSync('Não salvou: '+(j.erro||'erro'),'#F87171')}}
  catch(e){SUJO=true;if(e.login)pedeLogin();else{stSync('Sem conexão · tentando de novo','#FBBF24');clearTimeout(TM);TM=setTimeout(envia,8000)}}
  SALVANDO=false}
@@ -375,7 +385,7 @@ async function carrega(primeira){if(!K){pedeLogin();return}
  try{const j=await api({modo:'ler'});QUEM=j.quem||'';window.__semValor=QUEM==='planejamento';if(QUEM==='financeiro'){const bn=document.getElementById('brandNome');if(bn)bn.textContent='Porto Financeiro';document.title='Porto Financeiro'}const sf=document.querySelector('.sidefoot span[style]');if(sf&&QUEM)sf.textContent=({admin:'Administrador',gestao:'Gestão',planejamento:'Planejamento',financeiro:'Financeiro',producao:'Produção'})[QUEM]||QUEM;const av=document.querySelector('.sidefoot .av');if(av&&QUEM)av.textContent=QUEM.slice(0,2).toUpperCase();
   if(primeira||(!SUJO&&!SALVANDO&&j.v!==VER)){
    const aberto=document.querySelector('.drawer.on,.modal.on,dialog[open],.dlg.on');
-   if(j.db&&j.db.produtos)DB=j.db;else{stSync('Servidor sem dados da gestão','#F87171');return}
+   if(j.db&&j.db.produtos){DB=j.db;BASE=JSON.parse(JSON.stringify(j.db))}else{stSync('Servidor sem dados da gestão','#F87171');return}
    VER=j.v;const m=sincProps(j.props);cache();if(!aberto||primeira)render();
    if(j.v===0||m)salva();else stSync('✓ Conectado · equipe vê as mesmas informações')}
   else if(sincProps(j.props)){render();salva()}}

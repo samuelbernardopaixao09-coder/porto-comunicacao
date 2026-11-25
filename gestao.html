@@ -420,7 +420,7 @@ function painelPlan(){const hj=iso(HOJE);const sem=addD(7);const ativos=DB.jobs.
  '<div class="grid g4">'+kpi('Em produção',ativos.length,'pedidos abertos')+kpi('Atrasados',atras.length,'entrega já passou',atras.length?'#F87171':'')+kpi('Entregam em 7 dias',semana.length,'até '+dfmt(sem))+kpi('Sem entrada paga',semEntrada.length,'aguardando o financeiro')+'</div>'+
  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px;margin-top:14px;align-items:start">'+FASES.filter(f=>f!=='Concluído').map(f=>{const l=ativos.filter(j=>(j.etapa||'Arte')===f).sort((a,b)=>String(a.entrega||'9').localeCompare(String(b.entrega||'9')));return '<div class="card" style="min-width:0"><h2 style="display:flex;justify-content:space-between">'+f+' <span class="note">'+l.length+'</span></h2>'+(l.length?l.map(cartao).join(''):'<p class="note">Nenhum pedido nesta etapa.</p>')+'</div>'}).join('')+'</div>'+
  (DB.jobs.some(j=>j.status==='Finalizado'||j.etapa==='Concluído')?'<div class="card" style="margin-top:12px"><h2>Concluídos recentemente</h2>'+DB.jobs.filter(j=>j.status==='Finalizado'||j.etapa==='Concluído').slice(0,6).map(cartao).join('')+'</div>':'')}
-V.inicio=()=>{if(QUEM==='planejamento'){PTAB='painel';return V.planejamento()}const mes=DB.negocios.filter(n=>n.etapa==='Ganho'&&String(n.prazo).startsWith('2026-11')).reduce((s,n)=>s+(n.valor||0),0);const abertos=DB.negocios.filter(n=>!/Ganho|Perdido/.test(n.etapa));
+V.inicio=()=>{if(QUEM==='planejamento')return V.planejamento();const mes=DB.negocios.filter(n=>n.etapa==='Ganho'&&String(n.prazo).startsWith('2026-11')).reduce((s,n)=>s+(n.valor||0),0);const abertos=DB.negocios.filter(n=>!/Ganho|Perdido/.test(n.etapa));
  const somaR=f=>DB.receber.filter(x=>x.status!=='Pago'&&f(x)).reduce((s,x)=>s+x.valor,0),somaP=f=>DB.pagar.filter(x=>x.status!=='Pago'&&f(x)).reduce((s,x)=>s+x.valor,0);
  const ate=n=>x=>d2(x.venc)<=new Date(HOJE.getTime()+n*864e5);const hj=x=>x.venc<=iso(HOJE);
  const custos=DB.pagar.filter(x=>String(x.venc).startsWith('2026-11')).reduce((s,x)=>s+x.valor,0);const lucro=mes-custos;
@@ -470,7 +470,7 @@ const plDias=n=>[...Array(n)].map((_,i)=>{const x=new Date(HOJE);x.setDate(x.get
 const plIso=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
 const plVazio=t=>'<div class="card empty">'+t+'</div>';
 const PLV={
- painel:()=>{const A=plAt();const at=A.filter(j=>plF(j)!==null&&plF(j)<0),hj=A.filter(j=>plF(j)===0),am=A.filter(j=>plF(j)===1),ap=A.filter(j=>j.etapa==='Aprovação'||j.status==='Aguardando arte');
+ painel:()=>{const A=plAt();const at=A.filter(j=>plF(j)!==null&&plF(j)<0),hj=A.filter(j=>plF(j)===0),am=A.filter(j=>plF(j)===1),ap=A.filter(j=>j.etapa==='Aprovação');
   const li=l=>l.length?'<div class="pll">'+l.slice(0,6).map(j=>'<button type="button" data-os="'+j.id+'"><b>'+esc(j.num)+'</b> '+esc(j.cliente||'')+'</button>').join('')+(l.length>6?'<span class="note">+'+(l.length-6)+'</span>':'')+'</div>':'<div class="note">Nenhum</div>';
   const k=(c,e,t,l)=>'<div class="card kpi plk '+c+'"><div class="lb">'+e+' '+t+'</div><div class="vl">'+l.length+'</div>'+li(l)+'</div>';
   return '<div class="grid g4">'+k('bad','🚨','Atrasados',at)+k('warn','📤','Sai hoje',hj)+k('','📅','Amanhã',am)+k('','⏳','Esperando cliente',ap)+'</div>'+
@@ -493,7 +493,7 @@ const PLV={
   for(const f of plSet){h+='<div class="r">'+PL_EMO[f]+' '+f+'</div>'+ds.map(x=>{const n=A.filter(j=>j.etapa===f&&j.entrega===plIso(x)).length;if(!n)return '<div class="c" style="background:var(--surface2);color:var(--muted);font-weight:500">—</div>';const[b,c]=cor(n);return '<div class="c" style="background:'+b+';color:'+c+'">'+n+'</div>'}).join('')}
   return '<div class="tbox"><div class="plhm">'+h+'</div><p class="note" style="padding:0 14px 14px;margin:0">Pedidos de cada setor com entrega em cada dia. Vermelho (4 ou mais) indica dia apertado.</p></div>'}
 };
-V.planejamento=()=>{if(!PLV[PTAB])PTAB='painel';const A=plAt();return cab('planejamento',HOJE.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})+' · '+A.length+' pedidos em produção')+'<div class="seg plseg" role="tablist">'+PL_ABAS.map(([k,n])=>'<button type="button" role="tab" aria-selected="'+(k===PTAB)+'" class="'+(k===PTAB?'on':'')+'" onclick="PTAB=\''+k+'\';render()">'+n+'</button>').join('')+'</div>'+PLV[PTAB]()};
+V.planejamento=()=>{if(!PLV[PTAB])PTAB='painel';const A=plAt();return cab('planejamento',HOJE.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})+' · '+A.length+' pedidos em produção')+'<div class="seg plseg" role="tablist">'+PL_ABAS.map(([k,n])=>'<button type="button" role="tab" aria-selected="'+(k===PTAB)+'" class="'+(k===PTAB?'on':'')+'" data-ptab="'+k+'">'+n+'</button>').join('')+'</div>'+PLV[PTAB]()};
 /* fichas de produto para o Planejamento: materiais e processos, sem preço nem custo */
 function produtosPlan(){const p=DB.produtos.find(x=>x.id===PSEL)||DB.produtos[0];if(!p)return cab('produtos','Nenhum produto cadastrado.');const mo=id=>(DB.materias.find(m=>m.id===id)||{nome:'?',un:''});const po=id=>(DB.processos.find(x=>x.id===id)||{nome:'?'});
  return cab('produtos','Como cada produto é feito: materiais e etapas de processo. Sem valores.')+'<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));align-items:start"><div class="tbox plt" style="max-height:640px;overflow-y:auto"><table><thead><tr><th>Produto</th><th>Unidade</th></tr></thead><tbody>'+DB.produtos.map(x=>'<tr style="cursor:pointer'+(x.id===p.id?';background:var(--surface2)':'')+'" data-ps="'+x.id+'"><td><b>'+esc(x.nome)+'</b><br><small class="note">'+esc(x.familia||'')+'</small></td><td>'+esc(x.un||'')+'</td></tr>').join('')+'</tbody></table></div>'+
@@ -607,6 +607,7 @@ function liga(r){const v=$('#view');
  // conversas
  v.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>{CONV=b.dataset.cv;render()});
  // produção
+ v.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>{PTAB=b.dataset.ptab;render()});
  v.querySelectorAll('[data-fase]').forEach(b=>b.onclick=()=>{const j=DB.jobs.find(x=>x.id===b.dataset.fase);const i=FASES.indexOf(j.etapa);j.etapa=FASES[Math.min(FASES.length-1,i+1)];if(j.etapa==='Concluído')j.status='Finalizado';else if(j.status==='Aguardando arte')j.status='Em produção';salva();render();toast(j.num+' → '+j.etapa)});
  const nj=v.querySelector('[data-novojob]');if(nj)nj.onclick=()=>formDrawer('Novo job',[['titulo','Título'],['cliente','Cliente',DB.clientes.map(c=>c.nome)],['valor','Valor (R$)','n'],['entrega','Entrega','d']],{entrega:addD(5)},o=>{criaJob(o);salva();render();toast('Job criado')});
  // custeio

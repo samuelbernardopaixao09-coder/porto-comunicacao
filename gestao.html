@@ -384,7 +384,7 @@ function sincProps(props){let mud=false;const ET={pend:'Emitido',enviado:'Enviad
 async function carrega(primeira){if(!K){pedeLogin();return}
  try{const j=await api({modo:'ler'});QUEM=j.quem||'';window.__semValor=QUEM==='planejamento';if(QUEM==='financeiro'){const bn=document.getElementById('brandNome');if(bn)bn.textContent='Porto Financeiro';document.title='Porto Financeiro'}const sf=document.querySelector('.sidefoot span[style]');if(sf&&QUEM)sf.textContent=({admin:'Administrador',gestao:'Gestão',planejamento:'Planejamento',financeiro:'Financeiro',producao:'Produção'})[QUEM]||QUEM;const av=document.querySelector('.sidefoot .av');if(av&&QUEM)av.textContent=QUEM.slice(0,2).toUpperCase();
   if(primeira||(!SUJO&&!SALVANDO&&j.v!==VER)){
-   const aberto=document.querySelector('.drawer.on,.modal.on,dialog[open],.dlg.on');
+   const aberto=document.querySelector('.ov,.drawer.on,.modal.on,dialog[open],.dlg.on')||(document.activeElement&&document.activeElement.matches&&document.activeElement.matches('#view input,#view textarea,#view select'));
    if(j.db&&j.db.produtos){DB=j.db;BASE=JSON.parse(JSON.stringify(j.db))}else{stSync('Servidor sem dados da gestão','#F87171');return}
    VER=j.v;const m=sincProps(j.props);cache();if(!aberto||primeira)render();
    if(j.v===0||m)salva();else stSync('✓ Conectado · equipe vê as mesmas informações')}
@@ -398,7 +398,7 @@ function pedeLogin(){try{localStorage.removeItem('ppk')}catch(e){}location.repla
    if(!j.ok||!j.token){m.textContent=j.erro||'Usuário ou senha errados.';b.disabled=false;return}
    K=j.token;try{localStorage.setItem('ppk',K);localStorage.setItem('pu',j.u||'')}catch(x){}d.remove();carrega(true)}
   catch(x){m.textContent='Sem conexão. Tente de novo.';b.disabled=false}}}
-setInterval(()=>{if(K&&document.visibilityState==='visible'&&document.hasFocus())carrega(false)},180000);
+/* busca as mudanças da equipe a cada 20 s e ao voltar para a janela */setInterval(()=>{if(K&&document.visibilityState==='visible'&&!SUJO&&!SALVANDO)carrega(false)},20000);document.addEventListener('visibilitychange',()=>{if(K&&document.visibilityState==='visible'&&!SUJO&&!SALVANDO)carrega(false)});
 addEventListener('beforeunload',e=>{if(SUJO||SALVANDO){e.preventDefault();e.returnValue=''}});
 /* ---------- componentes ---------- */
 function cab(r,desc,btns){const it=ROTA[r]||{g:MENU[0],n:''};const g=it.g;return '<div class="vh"><span class="tile emo hd">'+(EMO[g.k]||IC[g.k])+'</span><div class="grow"><h1>'+esc(it.n)+'</h1>'+(desc?'<p>'+desc+'</p>':'')+'</div>'+(btns||'')+'</div>'}

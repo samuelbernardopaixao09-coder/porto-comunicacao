@@ -235,6 +235,12 @@ svg.ch text{fill:var(--muted);font-size:11px}
 .pllivre{border:1.5px dashed var(--line);border-radius:11px;color:var(--muted);font-size:12.5px;padding:14px;text-align:center}
 .plhm{display:grid;grid-template-columns:170px repeat(7,minmax(60px,1fr));gap:5px;min-width:700px;padding:14px}
 .plhm .h{text-align:center;font-weight:700;color:var(--muted);font-size:12px}.plhm .h.plhj{color:var(--accent)}.plhm .r{font-weight:700;padding:9px 4px}.plhm .c{border-radius:8px;text-align:center;padding:9px 2px;font-weight:800}
+
+/* Visão geral do Financeiro */
+.fch{width:100%;height:auto;display:block}.fch text{fill:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.fleg{display:flex;gap:16px;font-size:12.5px;color:var(--fg);margin:-4px 0 6px}.fleg span{display:inline-flex;align-items:center;gap:6px}.fleg i{width:12px;height:12px;border-radius:3px}
+.fhb{display:grid;gap:10px}.fhb .fr{display:grid;grid-template-columns:minmax(90px,170px) minmax(0,1fr) auto;align-items:center;gap:10px;font-size:13px}
+.fhb .fl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fhb .ft{height:14px;background:var(--surface2);border-radius:4px;overflow:hidden}.fhb .ft i{display:block;height:100%;border-radius:0 4px 4px 0}.fhb b{font-variant-numeric:tabular-nums;min-width:74px;text-align:right}.fhb small{grid-column:2/-1;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -301,7 +307,7 @@ const IC={
 };
 /* ---------- menu ---------- */
 const EMO={inicio:'▦',agenda:'🗓️',cad:'👥',cus:'🧮',crm:'💼',at:'💬',prod:'🏭',fin:'💰',est:'📦',rel:'📈',aj:'⚙️'};
-const SEMO={clientes:'👤',fornecedores:'🚚',funcionarios:'🧑‍🔧',agencias:'🏢',telefones:'☎️',produtos:'🏷️','materia-prima':'🧱',processos:'🔧',equipamentos:'🖨️','centros-custo':'🗂️',terceirizados:'🤝',negociacao:'📊',propostas:'📄',conversas:'💬',contatos:'📇',campanhas:'📣',acompanhamento:'👀',jobs:'🛠️',os:'🧾',terminal:'🖥️',planejamento:'📋',receber:'⬇️',pagar:'⬆️','despesas-fixas':'📌',movimentacoes:'🔁',conciliacao:'🏦',cartao:'💳',notas:'🧾',estoque:'📦',compras:'🛒','mov-estoque':'🔄'};
+const SEMO={clientes:'👤',fornecedores:'🚚',funcionarios:'🧑‍🔧',agencias:'🏢',telefones:'☎️',produtos:'🏷️','materia-prima':'🧱',processos:'🔧',equipamentos:'🖨️','centros-custo':'🗂️',terceirizados:'🤝',negociacao:'📊',propostas:'📄',conversas:'💬',contatos:'📇',campanhas:'📣',acompanhamento:'👀',jobs:'🛠️',os:'🧾',terminal:'🖥️',planejamento:'📋','fin-geral':'📈',receber:'⬇️',pagar:'⬆️','despesas-fixas':'📌',movimentacoes:'🔁',conciliacao:'🏦',cartao:'💳',notas:'🧾',estoque:'📦',compras:'🛒','mov-estoque':'🔄'};
 const MENU=[
  {k:'inicio',n:'Visão geral',c:'#22D3EE',r:'inicio'},
  {k:'agenda',n:'Agenda',c:'#A78BFA',r:'agenda'},
@@ -310,7 +316,7 @@ const MENU=[
  {k:'crm',n:'Vendas (CRM)',c:'#F472B6',sub:[['negociacao','Painel de negociação'],['propostas','Propostas']]},
  {k:'at',n:'Atendimento',c:'#34D399',sub:[['conversas','Conversas'],['contatos','Contatos'],['campanhas','Campanhas']]},
  {k:'prod',n:'Produção',c:'#FB923C',sub:[['acompanhamento','Acompanhamento'],['jobs','Jobs'],['os','Ordens de serviço'],['terminal','Terminal de produção'],['planejamento','Planejamento']]},
- {k:'fin',n:'Financeiro',c:'#22C55E',sub:[['receber','Contas a receber'],['pagar','Contas a pagar'],['despesas-fixas','Despesas fixas'],['movimentacoes','Movimentações'],['conciliacao','Conciliação bancária'],['cartao','Cartão de crédito'],['notas','Notas fiscais']]},
+ {k:'fin',n:'Financeiro',c:'#22C55E',sub:[['fin-geral','Visão geral'],['receber','Contas a receber'],['pagar','Contas a pagar'],['despesas-fixas','Despesas fixas'],['movimentacoes','Movimentações'],['conciliacao','Conciliação bancária'],['cartao','Cartão de crédito'],['notas','Notas fiscais']]},
  {k:'est',n:'Estoque',c:'#A3E635',sub:[['estoque','Posição de estoque'],['compras','Pedidos de compra'],['mov-estoque','Movimentações']]},
  {k:'rel',n:'Relatórios',c:'#F87171',r:'relatorios'},
  {k:'aj',n:'Ajustes',c:'#94A3B8',r:'ajustes'}
@@ -501,6 +507,36 @@ V.planejamento=()=>{if(!PLV[PTAB])PTAB='painel';const A=plAt();return cab('plane
 function produtosPlan(){const p=DB.produtos.find(x=>x.id===PSEL)||DB.produtos[0];if(!p)return cab('produtos','Nenhum produto cadastrado.');const mo=id=>(DB.materias.find(m=>m.id===id)||{nome:'?',un:''});const po=id=>(DB.processos.find(x=>x.id===id)||{nome:'?'});
  return cab('produtos','Como cada produto é feito: materiais e etapas de processo. Sem valores.')+'<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));align-items:start"><div class="tbox plt" style="max-height:640px;overflow-y:auto"><table><thead><tr><th>Produto</th><th>Unidade</th></tr></thead><tbody>'+DB.produtos.map(x=>'<tr style="cursor:pointer'+(x.id===p.id?';background:var(--surface2)':'')+'" data-ps="'+x.id+'"><td><b>'+esc(x.nome)+'</b><br><small class="note">'+esc(x.familia||'')+'</small></td><td>'+esc(x.un||'')+'</td></tr>').join('')+'</tbody></table></div>'+
  '<div class="card"><h2>'+esc(p.nome)+' <span class="note">· por '+esc(p.un||'')+'</span></h2>'+((p.mats||[]).length||(p.procs||[]).length?'':'<p class="note">A ficha deste produto ainda não foi montada.</p>')+((p.mats||[]).length?'<h3 class="note" style="text-transform:uppercase;letter-spacing:.05em;margin:6px 0">Materiais</h3><div class="tbox plt" style="box-shadow:none"><table><tbody>'+p.mats.map(([id,q])=>'<tr><td>'+esc(mo(id).nome)+'</td><td class="n">'+num(q)+' '+esc(mo(id).un||'')+'</td></tr>').join('')+'</tbody></table></div>':'')+((p.procs||[]).length?'<h3 class="note" style="text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px">Processos</h3><div class="tbox plt" style="box-shadow:none"><table><tbody>'+p.procs.map(([id,h])=>'<tr><td>'+esc(po(id).nome)+'</td><td class="n">'+num(h)+' h</td></tr>').join('')+'</tbody></table></div>':'')+'</div></div>'}
+/* Visão geral do Financeiro: indicadores, fluxo de caixa previsto e o que vence */
+const fK=v=>{const a=Math.abs(v);return (v<0?'−':'')+'R$ '+(a>=1000?(a/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil':Math.round(a).toLocaleString('pt-BR'))};
+const F_ENT='#2F6DB5',F_SAI='#F26B1D';
+function finDados(){const hj=iso(HOJE);
+ const P=DB.pagar.filter(x=>x.status!=='Pago').map(x=>({desc:x.desc||'',quem:x.fornecedor||'',valor:+x.valor||0,venc:x.venc||'',cat:x.categoria||'Outros',fixa:false}));
+ const fx=[];for(const f of (DB.fixas||[])){const m=String(f.freq||'').match(/dia\s+(\d+)/i);const dia=+(f.dia||(m&&m[1])||0);if(!dia)continue;for(let k=0;k<2;k++){const s=iso(new Date(HOJE.getFullYear(),HOJE.getMonth()+k,dia));if(s<hj)continue;const mes=s.slice(0,7);if(DB.pagar.some(p=>String(p.venc).startsWith(mes)&&(p.fornecedor===f.fav||p.desc===f.desc)))continue;fx.push({desc:f.desc||'',quem:f.fav||'',valor:+f.valor||0,venc:s,cat:'Despesa fixa (prevista)',fixa:true})}}
+ const R=DB.receber.filter(x=>x.status!=='Pago').map(x=>({desc:x.desc||x.cliente||'',quem:x.cliente||'',valor:+x.valor||0,venc:x.venc||'',sit:x.status||'Aberto'}));
+ for(const j of DB.jobs){if(!(+j.valor>0))continue;const c=String(j.cobranca||'');if(/pago|não gerar/i.test(c))continue;if(DB.receber.some(x=>x.job===j.num))continue;R.push({desc:j.num,quem:j.cliente||'',valor:+j.valor,venc:'',sit:c||'Aguardando'})}
+ return {hj,P,fx,R}}
+function finBarras(cats,ser){const W=640,H=230,L=58,B=26,T=12,n=cats.length,gw=(W-L-8)/n,bw=Math.min(26,(gw-14)/ser.length);const mx=Math.max(1,...ser.flatMap(s=>s.vals));const p=Math.pow(10,Math.floor(Math.log10(mx)));const top=[1,2,2.5,5,10].map(s=>s*p).find(t=>t>=mx);const y=v=>T+(H-T-B)*(1-v/top);
+ let g='';for(let k=0;k<=4;k++){const v=top*k/4;g+='<line x1="'+L+'" x2="'+(W-4)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" stroke-width="1"'+(k?' stroke-dasharray="3 4"':'')+'/><text x="'+(L-8)+'" y="'+(y(v)+4)+'" text-anchor="end">'+fK(v)+'</text>'}
+ cats.forEach((c,i)=>{const x0=L+gw*i+(gw-bw*ser.length-2*(ser.length-1))/2;ser.forEach((s,k)=>{const v=s.vals[i];if(!v)return;const x=x0+k*(bw+2),yy=y(v),h=Math.max(2,y(0)-yy);g+='<path d="M'+x+','+(yy+h)+'V'+(yy+4)+'q0,-4 4,-4h'+(bw-8)+'q4,0 4,4V'+(yy+h)+'Z" fill="'+s.cor+'"><title>'+esc(c)+' · '+s.nome+': '+brl(v)+'</title></path>'});g+='<text x="'+(L+gw*i+gw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+esc(c)+'</text>'});
+ return '<div class="fleg">'+ser.map(s=>'<span><i style="background:'+s.cor+'"></i>'+s.nome+'</span>').join('')+'</div><svg class="ch fch" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de barras">'+g+'</svg>'}
+function finHB(itens,cor){const mx=Math.max(1,...itens.map(x=>x[1]));return itens.length?'<div class="fhb">'+itens.map(([l,v,ex])=>'<div class="fr" title="'+esc(l)+': '+brl(v)+'"><span class="fl">'+esc(l)+'</span><span class="ft"><i style="width:'+Math.max(2,v/mx*100)+'%;background:'+cor+'"></i></span><b>'+fK(v)+'</b>'+(ex?'<small>'+ex+'</small>':'')+'</div>').join('')+'</div>':'<div class="note">Nada em aberto.</div>'}
+function finPainel(){const {hj,P,fx,R}=finDados();const S=[...P,...fx];const soma=l=>l.reduce((s,x)=>s+x.valor,0);
+ const venc=P.filter(x=>x.venc&&x.venc<hj);const d30=addD(30);const s30=S.filter(x=>x.venc&&x.venc<=d30);const r30=R.filter(x=>x.venc&&x.venc<=d30);const res=soma(r30)-soma(s30);
+ const seg=new Date(HOJE);seg.setDate(seg.getDate()-((seg.getDay()+6)%7));const W=[...Array(6)].map((_,i)=>{const a=new Date(seg);a.setDate(a.getDate()+7*i);const b=new Date(a);b.setDate(b.getDate()+6);return {a:iso(a),b:iso(b),lab:(i?String(a.getDate()).padStart(2,'0')+'/'+String(a.getMonth()+1).padStart(2,'0'):'Esta semana'),e:0,s:0}});
+ const poe=(l,k)=>l.forEach(x=>{if(!x.venc)return;let w=W.find(w=>x.venc>=w.a&&x.venc<=w.b);if(!w&&x.venc<W[0].a)w=W[0];if(w)w[k]+=x.valor});poe(R,'e');poe(S,'s');
+ const cats={};for(const x of S)cats[x.cat]=(cats[x.cat]||0)+x.valor;const catL=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,7);
+ const sit={};for(const x of R)sit[x.sit]=(sit[x.sit]||0)+x.valor;const sitL=Object.entries(sit).sort((a,b)=>b[1]-a[1]);
+ const meses=[];for(let k=5;k>=0;k--){const dt=new Date(HOJE.getFullYear(),HOJE.getMonth()-k,1);const m=iso(dt).slice(0,7);const l=DB.movs.filter(x=>String(x.data).startsWith(m));meses.push([dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.',''),l.filter(x=>x.valor>0).reduce((s,x)=>s+x.valor,0),-l.filter(x=>x.valor<0).reduce((s,x)=>s+x.valor,0)])}
+ const prox=S.slice().sort((a,b)=>String(a.venc).localeCompare(String(b.venc))).slice(0,8);
+ const k=(lb,vl,dt,cl)=>'<div class="card kpi"><div class="lb">'+lb+'</div><div class="vl '+(cl||'')+'">'+vl+'</div><div class="dt">'+dt+'</div></div>';
+ return cab('fin-geral','Resumo do caixa: saldo, o que entra, o que sai e o que vence. Atualizado em '+(DB.atualizado||'—')+'.')+
+ '<div class="grid g4">'+k('Saldo em conta',brl(DB.saldo),'conforme as movimentações')+k('A receber',brl(soma(R)),R.length+' cobrança(s) em aberto','up')+k('A pagar em aberto',brl(soma(P)),venc.length?'<span class="down">'+venc.length+' vencida(s) · '+brl(soma(venc))+'</span>':'nenhuma vencida')+k('Resultado previsto em 30 dias',brl(res),'entradas − saídas até '+dfmt(d30),res<0?'down':'up')+'</div>'+
+ '<div class="card"><h2>📊 Fluxo de caixa previsto · próximas 6 semanas</h2>'+finBarras(W.map(w=>w.lab),[{nome:'Entradas',cor:F_ENT,vals:W.map(w=>w.e)},{nome:'Saídas',cor:F_SAI,vals:W.map(w=>w.s)}])+'<p class="note" style="margin:6px 0 0">Saídas = contas a pagar + despesas fixas previstas. Contas vencidas entram em "Esta semana". Cobranças sem data de vencimento ficam de fora.</p></div>'+
+ '<div class="grid g2"><div class="card"><h2>⬆️ A pagar por categoria</h2>'+finHB(catL,F_SAI)+'</div><div class="card"><h2>⬇️ A receber por situação</h2>'+finHB(sitL,F_ENT)+'</div></div>'+
+ '<div class="grid g2"><div class="card"><h2>🔁 Entradas e saídas por mês</h2>'+finBarras(meses.map(m=>m[0]),[{nome:'Entradas',cor:F_ENT,vals:meses.map(m=>m[1])},{nome:'Saídas',cor:F_SAI,vals:meses.map(m=>m[2])}])+'</div>'+
+ '<div class="card"><h2>📅 Próximos vencimentos</h2><div class="tbox plt" style="box-shadow:none"><table><thead><tr><th>Vence</th><th>Conta</th><th class="n">Valor</th></tr></thead><tbody>'+(prox.length?prox.map(x=>'<tr><td>'+(x.venc<hj?'<span class="pill bad">'+dfmt(x.venc)+'</span>':x.venc===hj?'<span class="pill warn">Hoje</span>':dfmt(x.venc))+'</td><td><b>'+esc(x.desc)+'</b><br><span class="note">'+esc(x.quem)+(x.fixa?' · prevista':'')+'</span></td><td class="n">'+brl(x.valor)+'</td></tr>').join(''):'<tr><td colspan="3" class="note">Nada a vencer.</td></tr>')+'</tbody></table></div><p style="margin:10px 0 0"><a class="btn sm" href="#pagar">Ver contas a pagar</a> <a class="btn sm" href="#receber">Ver contas a receber</a></p></div></div>'}
+V['fin-geral']=finPainel;
 /* Custeio */
 let PSEL='P1';
 const matOf=id=>DB.materias.find(m=>m.id===id)||{nome:'?',custo:0,un:''};const procOf=id=>DB.processos.find(p=>p.id===id)||{nome:'?',valorHora:0};
@@ -595,7 +631,7 @@ function cardify(r){if(r==='relatorios')return;const v=$('#view');
  if(r==='inicio'){const m={'Vendas aprovadas no mês':'propostas','Propostas em aberto':'negociacao','Jobs em produção':'jobs','Lucro estimado do mês':'relatorios','A receber':'receber','A pagar':'pagar','Funil de vendas':'negociacao','Saldo das contas':'movimentacoes','Fechamentos previstos este mês':'negociacao','Tarefas de hoje':'agenda'};v.querySelectorAll('.card').forEach(c=>{const t=(c.querySelector('.lb,h2')||{}).textContent||'';const k=Object.keys(m).find(x=>t.startsWith(x));if(k){c.classList.add('kclick');c.title='Abrir '+k;c.onclick=()=>{if(k.startsWith('Lucro'))REL='dre';location.hash=m[k]}}})}
 }
 /* ---------- roteamento ---------- */
-function rota(){let r=(location.hash||'').slice(1);const qi=r.indexOf('?');if(qi>=0){const q=new URLSearchParams(r.slice(qi+1));r=r.slice(0,qi);const jn=q.get('job');if(jn&&DB&&DB.jobs){const j=DB.jobs.find(x=>x.num===jn);if(j)OSSEL=j.id}}if(!V[r])r='inicio';if(QUEM==='planejamento'&&!PLAN_R.has(r))r='inicio';if(QUEM==='financeiro'&&!FIN_R.has(r))r='receber';return r}
+function rota(){let r=(location.hash||'').slice(1);const qi=r.indexOf('?');if(qi>=0){const q=new URLSearchParams(r.slice(qi+1));r=r.slice(0,qi);const jn=q.get('job');if(jn&&DB&&DB.jobs){const j=DB.jobs.find(x=>x.num===jn);if(j)OSSEL=j.id}}if(!V[r])r='inicio';if(QUEM==='planejamento'&&!PLAN_R.has(r))r='inicio';if(QUEM==='financeiro'&&!FIN_R.has(r))r='fin-geral';return r}
 function render(){(DB.jobs||[]).forEach(j=>{if(j.etapa==='Montagem')j.etapa='Embalagem';else if(j.etapa==='Expedição'||j.etapa==='Despache')j.etapa='Envio'});const r=rota();desenhaMenu(r);const it=ROTA[r];$('#crumb').innerHTML=it?(it.g.n!==it.n?esc(it.g.n)+' / ':'')+'<b>'+esc(it.n)+'</b>':'';$('#view').innerHTML=V[r]();cardify(r);liga(r);if(QUEM==='planejamento')soLeitura(r);$('#side').classList.remove('open');$('#scrim').classList.remove('on')}
 function liga(r){const v=$('#view');
  const q=v.querySelector('#q');if(q){q.oninput=()=>{BUSCA=q.value.toLowerCase();const p=q.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(p,p)}}
